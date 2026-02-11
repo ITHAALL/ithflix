@@ -17,27 +17,19 @@ db_flix = client["ithflix"]
 accounts = db_chat["accounts"]
 movies = db_flix["movies"]
 
-
-@app.before_request
-def block_non_brave():
-    if request.endpoint in ['brave_required', 'bypass_brave', 'static'] or request.cookies.get('bypass_brave') == 'true':
-        return
-
-    ua_full = request.headers.get('Sec-Ch-Ua', '')
-    user_agent = request.headers.get('User-Agent', '')
-
-    if 'Brave' not in ua_full and 'Brave' not in user_agent:
-        return redirect(url_for('brave_required'))
-    
-def login_required(f):
-    def wrapper(*args, **kwargs):
-        if 'user' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
-    return wrapper
+def get_imdb_id(query):
+    """ Convertit un titre en ID IMDb via OMDB """
+    omd_api_key = os.getenv("OMBD_API_KEY")
+    url = f"https://www.omdbapi.com/?t={query}&apikey={omd_api_key}"
+    try:
+        res = requests.get(url).json()
+        if res.get('Response') == 'False' and "API key" in res.get('Error', ''):
+            return "ERROR_API"
+        return res.get('imdbID') if res.get('Response') == 'True' else None
+    except: return "ERROR_API"
 
 def send_discord_embed(title, description, color=0x007bff):
+    """ Envoie des logs de connexion sur Discord """
     webhook_url = os.getenv("WEBHOOK_LOGS")
     if not webhook_url: return
     payload = {
@@ -50,15 +42,28 @@ def send_discord_embed(title, description, color=0x007bff):
     try: requests.post(webhook_url, json=payload)
     except: pass
 
-def get_imdb_id(query):
-    omd_api_key = os.getenv("OMBD_API_KEY")
-    url = f"https://www.omdbapi.com/?t={query}&apikey={omd_api_key}"
-    try:
-        res = requests.get(url).json()
-        if res.get('Response') == 'False' and "API key" in res.get('Error', ''):
-            return "ERROR_API"
-        return res.get('imdbID') if res.get('Response') == 'True' else None
-    except: return "ERROR_API"
+@app.before_request
+def block_non_brave():
+    """ Sécurité : Force l'utilisation de Brave pour bloquer les pubs nativement """
+    if request.endpoint in ['brave_required', 'bypass_brave', 'static'] or request.cookies.get('bypass_brave') == 'true':
+        return
+
+    ua_full = request.headers.get('Sec-Ch-Ua', '')
+    user_agent = request.headers.get('User-Agent', '')
+
+    if 'Brave' not in ua_full and 'Brave' not in user_agent:
+        return redirect(url_for('brave_required'))
+    
+def login_required(f):
+    """ Vérifie si l'utilisateur est connecté """
+    def wrapper(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+# --- ROUTES ---
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -86,20 +91,10 @@ def logout():
 def flix_index():
     return render_template('index.html')
 
-@app.route('/brave-required')
-def brave_required():
-    return render_template('brave_required.html')
-
-@app.route('/bypass-brave')
-def bypass_brave():
-    resp = make_response(redirect(url_for('login')))
-    resp.set_cookie('bypass_brave', 'true', max_age=60*60*24)
-    return resp
-
 @app.route('/watch')
 @login_required
 def watch():
-    m_type = request.args.get('type')
+    m_type = request.args.get('type', 'movie')
     search = request.args.get('imdb', '').strip()
     s, e = request.args.get('season', '1'), request.args.get('episode', '1')
 
@@ -114,9 +109,20 @@ def watch():
         search = res
 
     embed = f"https://vidsrcme.ru/embed/{'movie' if m_type=='movie' else 'tv'}?imdb={search}"
-    if m_type == 'series': embed += f"&season={s}&episode={e}"
+    if m_type in ['series', 'tv']: 
+        embed += f"&season={s}&episode={e}"
     
-    return render_template('watch.html', embed_url=embed)
+    return render_template('watch.html', embed_url=embed, m_type=m_type)
+
+@app.route('/brave-required')
+def brave_required():
+    return render_template('brave_required.html')
+
+@app.route('/bypass-brave')
+def bypass_brave():
+    resp = make_response(redirect(url_for('login')))
+    resp.set_cookie('bypass_brave', 'true', max_age=60*60*24)
+    return resp
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
