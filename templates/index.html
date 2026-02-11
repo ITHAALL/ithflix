@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'acceuil | ITHFlix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e50914;
+            --bg: #080808;
+            --text: #ffffff;
+            --blue-btn: #0071eb;
+            --card-advise: rgba(255, 255, 255, 0.05);
+            --stats-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .stats-bar {
+            width: 100%; background-color: var(--stats-bg); padding: 8px 0;
+            text-align: center; font-size: 0.8rem; color: #888;
+            border-bottom: 1px solid rgba(255,255,255,0.05); position: fixed; top: 0; z-index: 1001;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .stats-bar span { color: var(--text); font-weight: bold; margin: 0 10px; }
+
+        .logout-btn {
+            position: absolute; right: 20px; color: #888; text-decoration: none;
+            transition: 0.3s; font-weight: bold; font-size: 0.75rem;
+        }
+        .logout-btn:hover { color: var(--primary); }
+        .logout-btn i { margin-right: 5px; }
+
+        .navbar { display: flex; justify-content: center; padding: 20px; width: 100%; position: fixed; top: 35px; z-index: 1000; }
+        .logo { color: var(--primary); font-size: 2rem; font-weight: 900; letter-spacing: 2px; text-decoration: none; text-transform: uppercase; }
+
+        .logo span { 
+           color: white; 
+        }
+
+        .hero { margin-top: 160px; width: 100%; max-width: 600px; padding: 20px; text-align: center; }
+
+        .error-msg {
+            background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d;
+            padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;
+        }
+
+        .player-tester-menu {
+            background: #141414; padding: 30px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .toggle-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 25px; }
+        .type-btn { padding: 10px 25px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: #2a2a2a; color: #aaa; transition: 0.3s; }
+        .type-btn.active { background: var(--blue-btn); color: white; }
+
+        .input-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 5px; outline: none; font-size: 1rem; }
+        input:focus { border-color: var(--blue-btn); }
+
+        .watch-btn { margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+
+        .advise-container { margin-top: 40px; display: grid; gap: 20px; width: 100%; }
+        .advise-card { background: var(--card-advise); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); text-align: left; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="stats-bar">
+        Films : <span>+89.8K</span> Séries: <span>+19.9K</span> Épisodes: <span>+48K</span>
+        <a href="/logout" class="logout-btn"><i class="fa-solid fa-power-off"></i> DÉCONNEXION</a>
+    </div>
+    
+    <nav class="navbar"><a href="/" class="logo">ITH<span>FLIX</span></a></nav>
+
+    <div class="hero">
+        {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}
+            <div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> {{ message }}</div>
+        {% endfor %}{% endif %}{% endwith %}
+
+        <div class="player-tester-menu">
+            <h2 style="margin-top:0; margin-bottom: 20px;">🔍 Moteur de recherche ITHFlix</h2>
+            
+            <div class="toggle-group">
+                <button type="button" id="btn-movie" class="type-btn active" onclick="switchType('movie')">Films</button>
+                <button type="button" id="btn-series" class="type-btn" onclick="switchType('series')">Séries</button>
+            </div>
+
+            <form action="/watch" method="GET">
+                <input type="hidden" name="type" id="media-type" value="movie">
+                <div class="input-row">
+                    <input type="text" name="imdb" placeholder="Nom du film/série ou ID IMDb" required style="flex-grow: 1;">
+                    <div id="series-inputs" style="display: none; gap: 10px;">
+                        <input type="number" name="season" placeholder="Saison" style="width: 60px;">
+                        <input type="number" name="episode" placeholder="Épisode" style="width: 60px;">
+                    </div>
+                </div>
+                <p style="font-size: 0.75rem; color: #888; margin-top: 10px; text-align: left;">
+                    * Écrit en anglais et comme sur <a href="https://www.imdb.com" target="_blank" style="color: var(--blue-btn); text-decoration: none;">IMDb</a>.
+                </p>
+                <button type="submit" class="watch-btn">REGARDER</button>
+            </form>
+        </div>
+
+        <div class="advise-container">
+            <div class="advise-card"><i class="fa-solid fa-desktop" style="color: var(--primary); margin-right: 10px;"></i>
+                Si vous êtes sur <strong>PC</strong>, nous vous conseillons fortement d'installer <a href="https://chromewebstore.google.com/detail/adblock-bloquez-les-publi/gighmmpiobklfepjocnamgkkbiglidom?hl=fr" target="_blank" style="color: var(--blue-btn); text-decoration: none;">cette extension</a> afin de bloquer les pop-ups.
+            </div>
+            <div class="advise-card"><i class="fa-solid fa-mobile-screen-button" style="color: var(--primary); margin-right: 10px;"></i>
+                Si vous êtes sur <strong>mobile</strong>, nous vous conseillons fortement de visiter le site depuis l'application <strong>Brave</strong> pour bloquer les pubs.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchType(type) {
+            const isMovie = (type === 'movie');
+            document.getElementById('media-type').value = type;
+            document.getElementById('series-inputs').style.display = isMovie ? 'none' : 'flex';
+            document.getElementById('btn-movie').classList.toggle('active', isMovie);
+            document.getElementById('btn-series').classList.toggle('active', !isMovie);
+        }
+    </script>
+</body>
+</html>
