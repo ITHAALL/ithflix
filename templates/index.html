@@ -12,6 +12,7 @@
             --bg: #080808;
             --text: #ffffff;
             --blue-btn: #0071eb;
+            --discord: #5865F2;
             --card-advise: rgba(255, 255, 255, 0.05);
             --stats-bg: rgba(255, 255, 255, 0.03);
         }
@@ -39,12 +40,9 @@
 
         .navbar { display: flex; justify-content: center; padding: 20px; width: 100%; position: fixed; top: 35px; z-index: 1000; }
         .logo { color: var(--primary); font-size: 2rem; font-weight: 900; letter-spacing: 2px; text-decoration: none; text-transform: uppercase; }
+        .logo span { color: white; }
 
-        .logo span { 
-           color: white; 
-        }
-
-        .hero { margin-top: 160px; width: 100%; max-width: 600px; padding: 20px; text-align: center; }
+        .hero { margin-top: 160px; width: 100%; max-width: 600px; padding: 20px; text-align: center; margin-bottom: 50px; }
 
         .error-msg {
             background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d;
@@ -64,10 +62,42 @@
         input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 5px; outline: none; font-size: 1rem; }
         input:focus { border-color: var(--blue-btn); }
 
-        .watch-btn { margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .watch-btn { margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; }
+        .watch-btn:hover { background: #b20710; }
 
         .advise-container { margin-top: 40px; display: grid; gap: 20px; width: 100%; }
         .advise-card { background: var(--card-advise); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); text-align: left; font-size: 0.85rem; }
+
+        /* --- NOUVEAU : STYLE DISCORD --- */
+        .discord-card {
+            margin-top: 20px;
+            background: rgba(88, 101, 242, 0.05);
+            border: 1px dashed rgba(88, 101, 242, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: 0.3s;
+        }
+        .discord-card:hover { background: rgba(88, 101, 242, 0.1); }
+        
+        .discord-info { display: flex; align-items: center; gap: 15px; text-align: left; }
+        .discord-info i { font-size: 1.5rem; color: var(--discord); }
+        .discord-info p { margin: 0; font-size: 0.9rem; font-weight: 500; }
+        .discord-info span { font-size: 0.75rem; color: #888; }
+
+        .discord-btn {
+            background: var(--discord);
+            color: white;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .discord-btn:hover { filter: brightness(1.2); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -85,7 +115,7 @@
         {% endfor %}{% endif %}{% endwith %}
 
         <div class="player-tester-menu">
-            <h2 style="margin-top:0; margin-bottom: 20px;">🔍 Moteur de recherche ITHFlix</h2>
+            <h2 style="margin-top:0; margin-bottom: 20px;">🔍 Rechercher un film/série</h2>
             
             <div class="toggle-group">
                 <button type="button" id="btn-movie" class="type-btn active" onclick="switchType('movie')">Films</button>
@@ -109,11 +139,20 @@
         </div>
 
         <div class="advise-container">
-            <div class="advise-card"><i class="fa-solid fa-desktop" style="color: var(--primary); margin-right: 10px;"></i>
-                Si vous êtes sur <strong>PC</strong>, nous vous conseillons fortement d'installer <a href="https://chromewebstore.google.com/detail/adblock-bloquez-les-publi/gighmmpiobklfepjocnamgkkbiglidom?hl=fr" target="_blank" style="color: var(--blue-btn); text-decoration: none;">cette extension</a> afin de bloquer les pop-ups.
+            <div class="advise-card">
+                <i class="fa-solid fa-desktop" style="color: var(--primary); margin-right: 10px;"></i>
+                Nous vous conseillons <strong>fortement</strong> d'utiliser le navigateur <strong>Brave</strong> afin de bloquer tout les pop-ups.
             </div>
-            <div class="advise-card"><i class="fa-solid fa-mobile-screen-button" style="color: var(--primary); margin-right: 10px;"></i>
-                Si vous êtes sur <strong>mobile</strong>, nous vous conseillons fortement de visiter le site depuis l'application <strong>Brave</strong> pour bloquer les pubs.
+            
+            <div class="discord-card">
+                <div class="discord-info">
+                    <i class="fa-brands fa-discord"></i>
+                    <div>
+                        <p>Communauté ITHHub</p>
+                        <span>Soyez à l'affût concernant les nouveautés.</span>
+                    </div>
+                </div>
+                <a href="https://discord.gg/Yta7RJmkme" target="_blank" class="discord-btn">REJOINDRE</a>
             </div>
         </div>
     </div>
