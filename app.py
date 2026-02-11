@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for, flash, make_response
 from datetime import datetime
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
-from bson.objectid import ObjectId
 import os, requests
 
 load_dotenv()
@@ -18,6 +17,18 @@ db_flix = client["ithflix"]
 accounts = db_chat["accounts"]
 movies = db_flix["movies"]
 
+
+@app.before_request
+def block_non_brave():
+    if request.endpoint in ['brave_required', 'bypass_brave', 'static'] or request.cookies.get('bypass_brave') == 'true':
+        return
+
+    ua_full = request.headers.get('Sec-Ch-Ua', '')
+    user_agent = request.headers.get('User-Agent', '')
+
+    if 'Brave' not in ua_full and 'Brave' not in user_agent:
+        return redirect(url_for('brave_required'))
+    
 def login_required(f):
     def wrapper(*args, **kwargs):
         if 'user' not in session:
@@ -75,11 +86,21 @@ def logout():
 def flix_index():
     return render_template('index.html')
 
+@app.route('/brave-required')
+def brave_required():
+    return render_template('brave_required.html')
+
+@app.route('/bypass-brave')
+def bypass_brave():
+    resp = make_response(redirect(url_for('login')))
+    resp.set_cookie('bypass_brave', 'true', max_age=60*60*24)
+    return resp
+
 @app.route('/watch')
 @login_required
 def watch():
     m_type = request.args.get('type')
-    search = request.args.get('imdb').strip()
+    search = request.args.get('imdb', '').strip()
     s, e = request.args.get('season', '1'), request.args.get('episode', '1')
 
     if not search.startswith('tt'):
