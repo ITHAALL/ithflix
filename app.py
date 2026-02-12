@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, make_response
 from datetime import datetime
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -16,17 +16,7 @@ db_flix = client["ithflix"]
 
 accounts = db_chat["accounts"]
 movies = db_flix["movies"]
-
-def get_imdb_id(query):
-    """ Convertit un titre en ID IMDb via OMDB """
-    omd_api_key = os.getenv("OMBD_API_KEY")
-    url = f"https://www.omdbapi.com/?t={query}&apikey={omd_api_key}"
-    try:
-        res = requests.get(url).json()
-        if res.get('Response') == 'False' and "API key" in res.get('Error', ''):
-            return "ERROR_API"
-        return res.get('imdbID') if res.get('Response') == 'True' else None
-    except: return "ERROR_API"
+movies_names = db_flix["movies_names"]
 
 def send_discord_embed(title, description, color=0x007bff):
     """ Envoie des logs de connexion sur Discord """
@@ -89,30 +79,93 @@ def logout():
 @app.route('/flix')
 @login_required
 def flix_index():
-    return render_template('index.html')
+    page = request.args.get('page', 1, type=int)
+    sort_type = request.args.get('sort', 'date')
+    per_page = 24
+    skip = (page - 1) * per_page
+
+    pipeline = [
+        {
+            "$unionWith": {
+                "coll": "series_names",
+                "pipeline": [{"$addFields": {"media_type": "series"}}]
+            }
+        },
+        {
+            "$addFields": {
+                "media_type": {"$ifNull": ["$media_type", "movie"]},
+                "sort_priority": {
+                    "$cond": {
+                        "if": {"$or": [
+                            {"$eq": ["$title", "Inconnue"]},
+                            {"$eq": ["$release_date", "Inconnue"]}
+                        ]},
+                        "then": 1, "else": 0
+                    }
+                }
+            }
+        }
+    ]
+
+    if sort_type == 'alpha':
+        pipeline.append({"$sort": {"sort_priority": 1, "title": 1}})
+    else:
+        pipeline.append({"$sort": {"sort_priority": 1, "release_date": -1}})
+
+    pipeline_data = pipeline + [{"$skip": skip}, {"$limit": per_page}]
+    
+    catalog = list(db_flix["movies_names"].aggregate(pipeline_data, allowDiskUse=True))
+    
+    total_count = db_flix["movies_names"].count_documents({}) + db_flix["series_names"].count_documents({})
+    total_pages = (total_count // per_page) + (1 if total_count % per_page > 0 else 0)
+
+    if total_pages > 1000:
+        total_pages = 1000
+
+    stats = {
+        "movies_count": db_flix["movies_names"].count_documents({}),
+        "series_count": db_flix["series_names"].count_documents({})
+    }
+
+    return render_template('index.html',
+        catalog=catalog,
+        stats=stats, 
+        current_page=page,
+        total_pages=total_pages,
+        sort_type=sort_type
+    )
 
 @app.route('/watch')
 @login_required
 def watch():
     m_type = request.args.get('type', 'movie')
-    search = request.args.get('imdb', '').strip()
-    s, e = request.args.get('season', '1'), request.args.get('episode', '1')
-
-    if not search.startswith('tt'):
-        res = get_imdb_id(search)
-        if res == "ERROR_API":
-            flash("Erreur : Clé API invalide. Contactez un admin.")
-            return redirect(url_for('flix_index'))
-        if not res:
-            flash(f"'{search}' introuvable. Vérifiez l'anglais/IMDb.")
-            return redirect(url_for('flix_index'))
-        search = res
-
-    embed = f"https://vidsrcme.ru/embed/{'movie' if m_type=='movie' else 'tv'}?imdb={search}"
-    if m_type in ['series', 'tv']: 
-        embed += f"&season={s}&episode={e}"
+    imdb_id = request.args.get('imdb', '').strip()
+    season = request.args.get('season', '1')
+    episode = request.args.get('episode', '1')
     
-    return render_template('watch.html', embed_url=embed, m_type=m_type)
+    col = db_flix["movies_names"] if m_type == "movie" else db_flix["series_names"]
+    movie_in_db = col.find_one({"imdb_id": imdb_id})
+    search_title = movie_in_db.get('title') if movie_in_db else imdb_id
+    
+    api_key = os.getenv("OMBD_API_KEY")
+    movie_info = {}
+    try:
+        res = requests.get(f"https://www.omdbapi.com/?t={search_title}&apikey={api_key}").json()
+        if res.get("Response") == "True": 
+            movie_info = res
+    except: pass
+
+    if m_type == "series":
+        embed = f"https://vidsrcme.ru/embed/tv?imdb={imdb_id}&season={season}&episode={episode}"
+    else:
+        embed = f"https://vidsrcme.ru/embed/movie?imdb={imdb_id}"
+    
+    return render_template('watch.html', 
+        embed_url=embed, 
+        movie=movie_info, 
+        movie_title=search_title, 
+        m_type=m_type
+    )
 
 @app.route('/brave-required')
 def brave_required():
@@ -124,5 +177,30 @@ def bypass_brave():
     resp.set_cookie('bypass_brave', 'true', max_age=60*60*24)
     return resp
 
+@app.route('/api/search')
+@login_required
+def api_search():
+    query = request.args.get('q', '')
+    if len(query) < 2: return {"results": []}
+
+    regex = {"$regex": query, "$options": "i"}
+    
+    m_results = list(db_flix["movies_names"].find({"title": regex}).limit(5))
+    for r in m_results: r['media_type'] = 'movie'
+    
+    s_results = list(db_flix["series_names"].find({"title": regex}).limit(5))
+    for r in s_results: r['media_type'] = 'series'
+
+    combined = m_results + s_results
+    output = []
+    for item in combined:
+        output.append({
+            "title": item.get('title'),
+            "imdb_id": item.get('imdb_id'),
+            "release_date": item.get('release_date'),
+            "media_type": item.get('media_type')
+        })
+    return {"results": output}
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
