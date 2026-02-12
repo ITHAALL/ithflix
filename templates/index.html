@@ -4,167 +4,206 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page d'acceuil | ITHFlix</title>
+    <title>Catalogue | ITHFlix</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #e50914;
-            --bg: #080808;
-            --text: #ffffff;
-            --blue-btn: #0071eb;
-            --discord: #5865F2;
-            --card-advise: rgba(255, 255, 255, 0.05);
-            --stats-bg: rgba(255, 255, 255, 0.03);
+        :root { 
+            --primary: #e50914; /* Rouge ITHFlix */
+            --bg: #050505; 
+            --card-bg: #111111; 
+            --series-blue: #0071eb; /* Bleu Séries */
         }
 
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: var(--bg); color: var(--text); margin: 0;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            background: var(--bg); color: white; 
+            margin: 0; padding-top: 100px; 
+            display: flex; flex-direction: column; align-items: center;
         }
-
-        .stats-bar {
-            width: 100%; background-color: var(--stats-bg); padding: 8px 0;
-            text-align: center; font-size: 0.8rem; color: #888;
-            border-bottom: 1px solid rgba(255,255,255,0.05); position: fixed; top: 0; z-index: 1001;
-            display: flex; justify-content: center; align-items: center;
+        
+        /* Stats Bar */
+        .stats-bar { 
+            width: 100%; background: rgba(0,0,0,0.9); padding: 12px 0; 
+            text-align: center; font-size: 0.8rem; border-bottom: 1px solid #222; 
+            position: fixed; top: 0; z-index: 1001; backdrop-filter: blur(15px);
         }
-        .stats-bar span { color: var(--text); font-weight: bold; margin: 0 10px; }
+        .stats-bar span { color: var(--primary); font-weight: 800; margin: 0 10px; }
+        .stats-bar .series-count { color: var(--series-blue); }
+        
+        .container { width: 92%; max-width: 1300px; text-align: center; }
 
-        .logout-btn {
-            position: absolute; right: 20px; color: #888; text-decoration: none;
-            transition: 0.3s; font-weight: bold; font-size: 0.75rem;
-        }
-        .logout-btn:hover { color: var(--primary); }
-        .logout-btn i { margin-right: 5px; }
-
-        .navbar { display: flex; justify-content: center; padding: 20px; width: 100%; position: fixed; top: 35px; z-index: 1000; }
-        .logo { color: var(--primary); font-size: 2rem; font-weight: 900; letter-spacing: 2px; text-decoration: none; text-transform: uppercase; }
+        .logo { color: var(--primary); font-size: 2.8rem; font-weight: 900; text-decoration: none; margin-bottom: 30px; display: inline-block; }
         .logo span { color: white; }
 
-        .hero { margin-top: 160px; width: 100%; max-width: 600px; padding: 20px; text-align: center; margin-bottom: 50px; }
-
-        .error-msg {
-            background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d;
-            padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;
+        /* Recherche */
+        .search-box { 
+            background: var(--card-bg); padding: 40px; border-radius: 16px; 
+            border: 1px solid #222; margin-bottom: 60px; width: 100%; box-sizing: border-box;
         }
-
-        .player-tester-menu {
-            background: #141414; padding: 30px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .search-wrapper { position: relative; }
+        input[type="text"] { 
+            width: 100%; background: #000; border: 2px solid #333; color: white; 
+            padding: 18px; border-radius: 8px; font-size: 1.1rem; transition: 0.3s;
         }
-
-        .toggle-group { display: flex; gap: 10px; justify-content: center; margin-bottom: 25px; }
-        .type-btn { padding: 10px 25px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; background: #2a2a2a; color: #aaa; transition: 0.3s; }
-        .type-btn.active { background: var(--blue-btn); color: white; }
-
-        .input-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        input { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 5px; outline: none; font-size: 1rem; }
-        input:focus { border-color: var(--blue-btn); }
-
-        .watch-btn { margin-top: 20px; background: var(--primary); color: white; border: none; padding: 12px 40px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; transition: 0.2s; }
-        .watch-btn:hover { background: #b20710; }
-
-        .advise-container { margin-top: 40px; display: grid; gap: 20px; width: 100%; }
-        .advise-card { background: var(--card-advise); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); text-align: left; font-size: 0.85rem; }
-
-        /* --- NOUVEAU : STYLE DISCORD --- */
-        .discord-card {
-            margin-top: 20px;
-            background: rgba(88, 101, 242, 0.05);
-            border: 1px dashed rgba(88, 101, 242, 0.3);
-            padding: 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: 0.3s;
-        }
-        .discord-card:hover { background: rgba(88, 101, 242, 0.1); }
+        input[type="text"]:focus { border-color: var(--primary); outline: none; }
         
-        .discord-info { display: flex; align-items: center; gap: 15px; text-align: left; }
-        .discord-info i { font-size: 1.5rem; color: var(--discord); }
-        .discord-info p { margin: 0; font-size: 0.9rem; font-weight: 500; }
-        .discord-info span { font-size: 0.75rem; color: #888; }
-
-        .discord-btn {
-            background: var(--discord);
-            color: white;
-            text-decoration: none;
-            padding: 8px 18px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            transition: 0.3s;
+        #search-results { 
+            position: absolute; top: 100%; left: 0; right: 0; background: #161616; 
+            border: 1px solid #333; z-index: 2000; display: none; list-style: none; padding: 0;
+            border-radius: 8px; text-align: left;
         }
-        .discord-btn:hover { filter: brightness(1.2); transform: scale(1.05); }
+        .res-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .res-item:hover { background: var(--primary); }
+
+        /* Bouton dynamique */
+        .watch-btn { 
+            margin-top: 20px; width: 100%; padding: 18px; border: none; border-radius: 8px; 
+            font-weight: 900; background: #222; color: #555; cursor: not-allowed; transition: 0.4s;
+            text-transform: uppercase;
+        }
+        .watch-btn.active { background: var(--primary); color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3); }
+        .watch-btn.is-series { background: var(--series-blue) !important; box-shadow: 0 5px 15px rgba(0, 113, 235, 0.3); }
+
+        /* Grille & Badges */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-bottom: 60px; }
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #222; transition: 0.4s; cursor: pointer; text-align: left; overflow: hidden; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .card-content { padding: 20px; }
+        .card h4 { margin: 5px 0; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .badge { font-size: 0.65rem; font-weight: 900; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+        .badge-series { background: var(--series-blue); color: white; }
+        .badge-movie { background: var(--primary); color: white; }
+
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 50px 0; flex-wrap: wrap; }
+        .pg-btn { padding: 10px 15px; background: #1a1a1a; border: 1px solid #333; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .pg-btn.active { background: var(--primary); border-color: var(--primary); }
+        
+        .jump-box { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+        .jump-box input { width: 70px; background: #111; border: 1px solid #333; color: white; text-align: center; border-radius: 4px; }
     </style>
 </head>
 <body>
 
     <div class="stats-bar">
-        Films : <span>+89.8K</span> Séries: <span>+19.9K</span> Épisodes: <span>+480K</span>
-        <a href="/logout" class="logout-btn"><i class="fa-solid fa-power-off"></i> DÉCONNEXION</a>
+        ITHFLIX : <span>{{ stats.movies_count }} FILMS</span> | <span class="series-count">{{ stats.series_count }} SÉRIES</span>
+        <a href="/logout" style="float: right; margin-right: 30px; color: #888; text-decoration: none;"><i class="fa-solid fa-power-off"></i></a>
     </div>
-    
-    <nav class="navbar"><a href="/" class="logo">ITH<span>FLIX</span></a></nav>
 
-    <div class="hero">
-        {% with messages = get_flashed_messages() %}{% if messages %}{% for message in messages %}
-            <div class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> {{ message }}</div>
-        {% endfor %}{% endif %}{% endwith %}
+    <div class="container">
+        <a href="/flix" class="logo">ITH<span>FLIX</span></a>
 
-        <div class="player-tester-menu">
-            <h2 style="margin-top:0; margin-bottom: 20px;">🔍 Rechercher un film/série</h2>
-            
-            <div class="toggle-group">
-                <button type="button" id="btn-movie" class="type-btn active" onclick="switchType('movie')">Films</button>
-                <button type="button" id="btn-series" class="type-btn" onclick="switchType('series')">Séries</button>
-            </div>
-
+        <div class="search-box">
             <form action="/watch" method="GET">
-                <input type="hidden" name="type" id="media-type" value="movie">
-                <div class="input-row">
-                    <input type="text" name="imdb" placeholder="Nom du film/série ou ID IMDb" required style="flex-grow: 1;">
-                    <div id="series-inputs" style="display: none; gap: 10px;">
-                        <input type="number" name="season" placeholder="Saison" style="width: 60px;">
-                        <input type="number" name="episode" placeholder="Épisode" style="width: 60px;">
-                    </div>
+                <input type="hidden" name="imdb" id="imdb_id">
+                <input type="hidden" name="type" id="media_type" value="movie">
+                <div class="search-wrapper">
+                    <input type="text" id="movieInput" placeholder="Rechercher un film ou une série..." autocomplete="off">
+                    <ul id="search-results"></ul>
                 </div>
-                <p style="font-size: 0.75rem; color: #888; margin-top: 10px; text-align: left;">
-                    * Écrit en anglais et comme sur <a href="https://www.imdb.com" target="_blank" style="color: var(--blue-btn); text-decoration: none;">IMDb</a>.
-                </p>
-                <button type="submit" class="watch-btn">REGARDER</button>
+                <button type="submit" id="btnSubmit" class="watch-btn" disabled>SÉLECTIONNEZ UN TITRE</button>
             </form>
         </div>
 
-        <div class="advise-container">
-            <div class="advise-card">
-                <i class="fa-solid fa-desktop" style="color: var(--primary); margin-right: 10px;"></i>
-                Nous vous conseillons <strong>fortement</strong> d'utiliser le navigateur <strong>Brave</strong> afin de bloquer tout les pop-ups.
-            </div>
-            
-            <div class="discord-card">
-                <div class="discord-info">
-                    <i class="fa-brands fa-discord"></i>
-                    <div>
-                        <p>Communauté ITHHub</p>
-                        <span>Soyez à l'affût concernant les nouveautés.</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px;">
+            <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--primary)"></i> Catalogue</h3>
+            <select onchange="location.href='/flix?sort=' + this.value" style="background:#111; color:white; border:1px solid #333; border-radius:4px; padding:5px 10px;">
+                <option value="date" {% if sort_type == 'date' %}selected{% endif %}>Récents</option>
+                <option value="alpha" {% if sort_type == 'alpha' %}selected{% endif %}>Alphabétique</option>
+            </select>
+        </div>
+
+        <div class="grid">
+            {% for item in catalog %}
+            <div class="card" onclick="selectMedia('{{ item.imdb_id }}', '{{ item.title }}', '{{ item.media_type }}')">
+                <div class="card-content">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span class="badge {{ 'badge-series' if item.media_type == 'series' else 'badge-movie' }}">
+                            {{ 'Série' if item.media_type == 'series' else 'Film' }}
+                        </span>
+                        <small style="color: #555;">{{ item.release_date }}</small>
                     </div>
+                    <h4>{{ item.title }}</h4>
                 </div>
-                <a href="https://discord.gg/Yta7RJmkme" target="_blank" class="discord-btn">REJOINDRE</a>
             </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a href="/flix?page={{ current_page - 1 }}&sort={{ sort_type }}" class="pg-btn">Précédent</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == 1 or p == total_pages or (p >= current_page - 2 and p <= current_page + 2) %}
+                    <a href="/flix?page={{ p }}&sort={{ sort_type }}" class="pg-btn {{ 'active' if p == current_page }}">{{ p }}</a>
+                {% elif p == current_page - 3 or p == current_page + 3 %}
+                    <span style="color: #444;">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <a href="/flix?page={{ current_page + 1 }}&sort={{ sort_type }}" class="pg-btn">Suivant</a>
+            {% endif %}
+        </div>
+
+        <div class="jump-box">
+            <input type="number" id="jumpPage" placeholder="Page" min="1" max="{{ total_pages }}">
+            <button onclick="jumpTo()" style="background:var(--primary); color:white; border:none; padding:5px 15px; border-radius:4px; cursor:pointer;">Aller</button>
         </div>
     </div>
 
     <script>
-        function switchType(type) {
-            const isMovie = (type === 'movie');
-            document.getElementById('media-type').value = type;
-            document.getElementById('series-inputs').style.display = isMovie ? 'none' : 'flex';
-            document.getElementById('btn-movie').classList.toggle('active', isMovie);
-            document.getElementById('btn-series').classList.toggle('active', !isMovie);
+        const movieInput = document.getElementById('movieInput');
+        const results = document.getElementById('search-results');
+        const btn = document.getElementById('btnSubmit');
+
+        movieInput.addEventListener('input', async (e) => {
+            const q = e.target.value;
+            if (q.length < 2) { results.style.display = 'none'; return; }
+
+            const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            if (data.results.length > 0) {
+                results.innerHTML = data.results.map(m => `
+                    <li class="res-item" onclick="selectMedia('${m.imdb_id}', '${m.title}', '${m.media_type}')">
+                        <span>${m.title}</span>
+                        <span class="badge ${m.media_type == 'series' ? 'badge-series' : 'badge-movie'}">${m.media_type}</span>
+                    </li>
+                `).join('');
+                results.style.display = 'block';
+            }
+        });
+
+        function selectMedia(id, title, type) {
+            document.getElementById('imdb_id').value = id;
+            document.getElementById('media_type').value = type;
+            movieInput.value = title;
+            results.style.display = 'none';
+            btn.disabled = false;
+            btn.classList.add('active');
+
+            if (type === 'series') {
+                btn.classList.add('is-series');
+                btn.innerText = "REGARDER LA SÉRIE : " + title.toUpperCase();
+            } else {
+                btn.classList.remove('is-series');
+                btn.innerText = "REGARDER LE FILM : " + title.toUpperCase();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        function jumpTo() {
+            const p = document.getElementById('jumpPage').value;
+            const max = {{ total_pages }};
+            if(p > 0 && p <= max) {
+                window.location.href = `/flix?page=${p}&sort={{ sort_type }}`;
+            }
+        }
+
+        document.addEventListener('click', (e) => { if(!movieInput.contains(e.target)) results.style.display = 'none'; });
     </script>
 </body>
 </html>
