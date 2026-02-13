@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { 
-            --primary: #e50914; /* Rouge ITHFlix */
+            --primary: #e50914;
             --bg: #050505; 
             --card-bg: #111111; 
-            --series-blue: #0071eb; /* Bleu Séries */
+            --series-blue: #0071eb;
         }
 
         body { 
@@ -21,7 +21,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Stats Bar */
         .stats-bar { 
             width: 100%; background: rgba(0,0,0,0.9); padding: 12px 0; 
             text-align: center; font-size: 0.8rem; border-bottom: 1px solid #222; 
@@ -35,7 +34,6 @@
         .logo { color: var(--primary); font-size: 2.8rem; font-weight: 900; text-decoration: none; margin-bottom: 30px; display: inline-block; }
         .logo span { color: white; }
 
-        /* Recherche */
         .search-box { 
             background: var(--card-bg); padding: 40px; border-radius: 16px; 
             border: 1px solid #222; margin-bottom: 60px; width: 100%; box-sizing: border-box;
@@ -44,6 +42,7 @@
         input[type="text"] { 
             width: 100%; background: #000; border: 2px solid #333; color: white; 
             padding: 18px; border-radius: 8px; font-size: 1.1rem; transition: 0.3s;
+            box-sizing: border-box;
         }
         input[type="text"]:focus { border-color: var(--primary); outline: none; }
         
@@ -55,7 +54,6 @@
         .res-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .res-item:hover { background: var(--primary); }
 
-        /* Bouton dynamique */
         .watch-btn { 
             margin-top: 20px; width: 100%; padding: 18px; border: none; border-radius: 8px; 
             font-weight: 900; background: #222; color: #555; cursor: not-allowed; transition: 0.4s;
@@ -64,7 +62,6 @@
         .watch-btn.active { background: var(--primary); color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3); }
         .watch-btn.is-series { background: var(--series-blue) !important; box-shadow: 0 5px 15px rgba(0, 113, 235, 0.3); }
 
-        /* Grille & Badges */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-bottom: 60px; }
         .card { background: var(--card-bg); border-radius: 12px; border: 1px solid #222; transition: 0.4s; cursor: pointer; text-align: left; overflow: hidden; }
         .card:hover { border-color: var(--primary); transform: translateY(-5px); }
@@ -75,7 +72,6 @@
         .badge-series { background: var(--series-blue); color: white; }
         .badge-movie { background: var(--primary); color: white; }
 
-        /* Pagination */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 50px 0; flex-wrap: wrap; }
         .pg-btn { padding: 10px 15px; background: #1a1a1a; border: 1px solid #333; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }
         .pg-btn.active { background: var(--primary); border-color: var(--primary); }
@@ -87,7 +83,7 @@
 <body>
 
     <div class="stats-bar">
-        ITHFLIX : <span>{{ stats.movies_count }} FILMS</span> | <span class="series-count">{{ stats.series_count }} SÉRIES</span>
+        <span>{{ stats.movies_count }} FILMS</span> | <span class="series-count">{{ stats.series_count }} SÉRIES</span>
         <a href="/logout" style="float: right; margin-right: 30px; color: #888; text-decoration: none;"><i class="fa-solid fa-power-off"></i></a>
     </div>
 
