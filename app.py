@@ -108,7 +108,20 @@ def flix_index():
     ]
 
     if sort_type == 'alpha':
-        pipeline.append({"$sort": {"sort_priority": 1, "title": 1}})
+        pipeline.append({
+            "$addFields": {
+                "char_priority": {
+                    "$switch": {
+                        "branches": [
+                            {"case": {"$regexMatch": {"input": "$title", "regex": "^[a-zA-Z]"}}, "then": 1},
+                            {"case": {"$regexMatch": {"input": "$title", "regex": "^[0-9]"}}, "then": 2}
+                        ],
+                        "default": 3
+                    }
+                }
+            }
+        })
+        pipeline.append({"$sort": {"sort_priority": 1, "char_priority": 1, "title": 1}})
     else:
         pipeline.append({"$sort": {"sort_priority": 1, "release_date": -1}})
 
@@ -149,10 +162,17 @@ def watch():
     
     api_key = os.getenv("OMBD_API_KEY")
     movie_info = {}
+    season_data = {}
+
     try:
-        res = requests.get(f"https://www.omdbapi.com/?t={search_title}&apikey={api_key}").json()
+        res = requests.get(f"https://www.omdbapi.com/?i={imdb_id}&apikey={api_key}").json()
         if res.get("Response") == "True": 
             movie_info = res
+            
+            if m_type == "series":
+                s_res = requests.get(f"https://www.omdbapi.com/?i={imdb_id}&Season={season}&apikey={api_key}").json()
+                if s_res.get("Response") == "True":
+                    season_data = s_res
     except: pass
 
     if m_type == "series":
@@ -163,8 +183,11 @@ def watch():
     return render_template('watch.html', 
         embed_url=embed, 
         movie=movie_info, 
+        season_data=season_data,
         movie_title=search_title, 
-        m_type=m_type
+        m_type=m_type,
+        current_season=int(season),
+        current_episode=int(episode)
     )
 
 @app.route('/brave-required')
