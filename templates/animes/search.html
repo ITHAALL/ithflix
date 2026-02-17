@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Recherche{% if query %} — {{ query }}{% endif %} — ITHFlix{% endblock %}
+
+{% block content %}
+<section class="search-section">
+  <div class="search-container">
+    <h1 class="page-title">Recherche</h1>
+
+    <form action="{{ url_for('anime_search') }}" method="get" class="search-form-large">
+      <input type="text" name="q"
+             placeholder="Rechercher un anime..."
+             class="search-input-large"
+             value="{{ query }}"
+             autofocus>
+      <button type="submit" class="search-btn-large">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Rechercher
+      </button>
+    </form>
+
+    {% if query %}
+    <div class="search-results">
+      <p class="results-title">
+        {% if animes %}
+          {{ animes|length }} résultat{{ 's' if animes|length > 1 else '' }} pour <strong>"{{ query }}"</strong>
+        {% else %}
+          Aucun résultat pour <strong>"{{ query }}"</strong>
+        {% endif %}
+      </p>
+
+      {% if animes %}
+      <div class="animes-grid">
+        {% for anime in animes %}
+        <a href="{{ url_for('anime_detail', anime_name=anime.name) }}" class="anime-card">
+          <div class="anime-cover">
+            <img src="{{ anime.cover_url }}" alt="{{ anime.name }}" loading="lazy">
+            <div class="anime-overlay">
+              <span class="play-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="anime-info">
+            <h3 class="anime-title">{{ anime.name }}</h3>
+            <div class="anime-genres">
+              {% for genre in anime.genres[:3] %}
+              <span class="genre-tag">{{ genre }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="empty-state">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h3>Aucun résultat trouvé</h3>
+        <p>Essayez avec un autre terme de recherche.</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ anime.name }} — ITHFlix{% endblock %}
+
+{% block content %}
+<section class="anime-detail-hero"
+  style="background-image: linear-gradient(to bottom, rgba(9,9,9,0.3), rgba(9,9,9,0.97)), url('{{ anime.cover_url }}');">
+  <div class="detail-hero-content">
+    <div class="anime-poster">
+      <img src="{{ anime.cover_url }}" alt="{{ anime.name }}">
+    </div>
+    <div class="anime-details">
+      <h1 class="detail-title">{{ anime.name }}</h1>
+      <div class="detail-meta">
+        <span class="status-badge {{ 'status-ongoing' if anime.status == 'En cours' else 'status-finished' }}">
+          {{ anime.status }}
+        </span>
+        <span class="meta-item">{{ anime.seasons|length }} saison{{ 's' if anime.seasons|length > 1 else '' }}</span>
+        <span class="meta-item">{{ anime.seasons|total_episodes }} épisodes</span>
+      </div>
+      <div class="detail-genres">
+        {% for genre in anime.genres %}
+        <a href="{{ url_for('anime_genre', genre_name=genre) }}" class="genre-badge">{{ genre }}</a>
+        {% endfor %}
+      </div>
+      {% if anime.description %}
+      <p class="detail-description">{{ anime.description }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="seasons-section">
+  <div class="section-container">
+    <h2 class="section-title" style="margin-bottom:24px;">Saisons &amp; Épisodes</h2>
+    <div class="seasons-list">
+      {% for season in anime.seasons|sort(attribute='season_number') %}
+      <div class="season-card">
+        <div class="season-header">
+          <h3 class="season-title">Saison {{ season.season_number }}</h3>
+          <span class="season-count">{{ season.total_episodes }} épisodes</span>
+        </div>
+        <div class="episodes-grid">
+          {% for episode in season.episodes|sort(attribute='episode_number') %}
+          <a href="{{ url_for('watch_anime', anime_name=anime.name, season_num=season.season_number, episode_num=episode.episode_number) }}"
+             class="episode-item">
+            <div class="episode-number">{{ episode.episode_number }}</div>
+            <div class="episode-info">
+              <span class="episode-title">{{ episode.title }}</span>
+              <span class="episode-sources">{{ episode.sources|length }} source{{ 's' if episode.sources|length > 1 else '' }}</span>
+            </div>
+            <div class="episode-play">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

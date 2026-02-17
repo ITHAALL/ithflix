@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Animes — ITHFlix{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title animate-in">
+      Catalogue<br>
+      <span class="highlight">Animes</span>
+    </h1>
+    <p class="hero-subtitle animate-in delay-1">
+      Retrouvez tous vos animes favoris, saison par saison.
+    </p>
+    <a href="#animes-grid" class="hero-cta animate-in delay-2">
+      Explorer maintenant
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+  <div class="hero-decoration">
+    <div class="deco-circle"></div>
+    <div class="deco-circle"></div>
+    <div class="deco-circle"></div>
+  </div>
+</section>
+
+<section class="animes-section" id="animes-grid">
+  <div class="section-header">
+    <h2 class="section-title">Catalogue complet</h2>
+    <div class="title-underline"></div>
+  </div>
+
+  {% if animes %}
+  <div class="animes-grid">
+    {% for anime in animes %}
+    <a href="{{ url_for('anime_detail', anime_name=anime.name) }}" class="anime-card">
+      <div class="anime-cover">
+        <img src="{{ anime.cover_url }}" alt="{{ anime.name }}" loading="lazy">
+        <div class="anime-overlay">
+          <span class="play-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </div>
+      </div>
+      <div class="anime-info">
+        <h3 class="anime-title">{{ anime.name }}</h3>
+        <div class="anime-meta">
+          <span class="anime-seasons">{{ anime.seasons|length }} saison{{ 's' if anime.seasons|length > 1 else '' }}</span>
+          <span class="anime-dot">•</span>
+          <span class="anime-episodes">{{ anime.seasons|total_episodes }} ép.</span>
+        </div>
+        <div class="anime-genres">
+          {% for genre in anime.genres[:3] %}
+          <span class="genre-tag">{{ genre }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-dragon" style="font-size:3rem;opacity:.2;"></i>
+    <h3>Aucun anime disponible</h3>
+    <p>Ajoutez des animes à votre base de données pour commencer.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

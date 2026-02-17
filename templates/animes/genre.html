@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ genre }} — ITHFlix{% endblock %}
+
+{% block content %}
+<section class="genre-section">
+  <div class="genre-header">
+    <h1 class="genre-title">Genre : <span>{{ genre }}</span></h1>
+    <p class="genre-count">
+      {{ animes|length }} anime{{ 's' if animes|length > 1 else '' }}
+      disponible{{ 's' if animes|length > 1 else '' }}
+    </p>
+  </div>
+
+  {% if animes %}
+  <div class="animes-grid">
+    {% for anime in animes %}
+    <a href="{{ url_for('anime_detail', anime_name=anime.name) }}" class="anime-card">
+      <div class="anime-cover">
+        <img src="{{ anime.cover_url }}" alt="{{ anime.name }}" loading="lazy">
+        <div class="anime-overlay">
+          <span class="play-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </div>
+      </div>
+      <div class="anime-info">
+        <h3 class="anime-title">{{ anime.name }}</h3>
+        <div class="anime-genres">
+          {% for g in anime.genres[:3] %}
+          <span class="genre-tag">{{ g }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-dragon" style="font-size:3rem;opacity:.2;"></i>
+    <h3>Aucun anime dans ce genre</h3>
+    <p>Ce genre ne contient pas encore d'animes.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
