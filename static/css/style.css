@@ -1,0 +1,1090 @@
+/* ============================================================
+   ITH-HUB — Design System
+   Anime-first dark theme: deep blacks, crimson accents,
+   Bebas Neue headers, Poppins body.
+   ============================================================ */
+
+/* ── Reset & Variables ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:        #e50914;
+  --red-dim:    rgba(229, 9, 20, 0.15);
+  --red-glow:   rgba(229, 9, 20, 0.35);
+  --gold:       #ffd700;
+  --bg:         #090909;
+  --bg-card:    #111111;
+  --bg-hover:   #1a1a1a;
+  --bg-nav:     rgba(9, 9, 9, 0.92);
+  --border:     rgba(255,255,255,0.07);
+  --text:       #f0f0f0;
+  --text-dim:   #888;
+  --text-muted: #555;
+  --radius:     10px;
+  --radius-sm:  6px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  --nav-height: 68px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+img { display: block; max-width: 100%; }
+
+/* ── Grain Overlay ──────────────────────────────────────────── */
+.grain-overlay {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+/* ── Typography ─────────────────────────────────────────────── */
+.bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+
+h1, h2, h3 { font-weight: 700; }
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: var(--nav-height);
+  background: var(--bg-nav);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+}
+
+.nav-container {
+  width: 100%; max-width: 1400px;
+  margin: 0 auto; padding: 0 40px;
+  display: flex; align-items: center; gap: 32px;
+}
+
+/* Logo */
+.nav-logo { display: flex; align-items: baseline; gap: 2px; }
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.7rem; letter-spacing: 2px;
+  color: var(--red);
+}
+.logo-suffix {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.7rem; letter-spacing: 2px;
+  color: var(--text);
+}
+
+/* Section tabs: Films / Animes */
+.nav-tabs {
+  display: flex; gap: 4px;
+}
+
+.nav-tab {
+  padding: 6px 18px;
+  border-radius: 30px;
+  font-size: 0.82rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-dim);
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+
+.nav-tab:hover { color: var(--text); background: var(--bg-hover); }
+
+.nav-tab.active {
+  color: var(--text);
+  background: var(--red-dim);
+  border-color: var(--red);
+}
+
+/* Nav links */
+.nav-menu {
+  display: flex; gap: 4px; margin-left: auto;
+}
+
+.nav-link {
+  padding: 6px 14px;
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.nav-link:hover { color: var(--text); background: var(--bg-hover); }
+
+/* Search */
+.nav-search { margin-left: auto; }
+
+.search-form { display: flex; align-items: center; }
+
+.search-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  color: var(--text);
+  padding: 7px 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  width: 220px;
+  transition: var(--transition);
+  outline: none;
+}
+.search-input:focus {
+  background: rgba(255,255,255,0.09);
+  border-color: var(--red);
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+.search-btn {
+  background: var(--red);
+  border: none; cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: white;
+  display: flex; align-items: center;
+  transition: var(--transition);
+}
+.search-btn:hover { background: #ff1a24; }
+
+/* User info */
+.nav-user {
+  display: flex; align-items: center; gap: 14px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.nav-username {
+  font-size: 0.82rem; font-weight: 600; color: var(--text-dim);
+}
+.nav-username span { color: var(--text); }
+
+.nav-logout {
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.nav-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Main content ───────────────────────────────────────────── */
+.main-content { padding-top: var(--nav-height); min-height: 100vh; }
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero {
+  position: relative; overflow: hidden;
+  min-height: 420px;
+  display: flex; align-items: center;
+  padding: 80px 40px 60px;
+  background: radial-gradient(ellipse at 60% 0%, rgba(229,9,20,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 10% 80%, rgba(100,0,0,0.15) 0%, transparent 50%);
+}
+
+.hero-content { max-width: 600px; position: relative; z-index: 2; }
+
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  margin-bottom: 18px;
+}
+
+.highlight { color: var(--red); }
+
+.hero-subtitle {
+  font-size: 1rem; color: var(--text-dim);
+  margin-bottom: 32px; max-width: 440px;
+}
+
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--red);
+  color: white;
+  padding: 13px 28px;
+  border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  transition: var(--transition);
+  box-shadow: 0 4px 20px var(--red-glow);
+}
+.hero-cta:hover {
+  background: #ff1a24;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px var(--red-glow);
+}
+
+/* Deco circles */
+.hero-decoration { position: absolute; right: 0; top: 0; bottom: 0; width: 50%; z-index: 1; overflow: hidden; }
+.deco-circle {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(229,9,20,0.1);
+  animation: pulse-circle 8s ease-in-out infinite;
+}
+.deco-circle:nth-child(1) { width: 600px; height: 600px; right: -200px; top: -150px; }
+.deco-circle:nth-child(2) { width: 400px; height: 400px; right: -50px; top: 50px; animation-delay: 2s; border-color: rgba(229,9,20,0.06); }
+.deco-circle:nth-child(3) { width: 250px; height: 250px; right: 80px; top: 100px; animation-delay: 4s; border-color: rgba(229,9,20,0.08); }
+
+@keyframes pulse-circle {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+/* ── Section Layout ─────────────────────────────────────────── */
+.section-header {
+  padding: 48px 40px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem; letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.title-underline {
+  flex: 1; height: 1px;
+  background: linear-gradient(to right, var(--red), transparent);
+}
+
+.section-container { padding: 0 40px 60px; }
+.animes-section { padding-bottom: 60px; }
+
+/* ── Card Grid ──────────────────────────────────────────────── */
+.animes-grid, .movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+  padding: 0 40px;
+}
+
+/* Anime Card */
+.anime-card, .movie-card {
+  display: block;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative;
+}
+
+.anime-card:hover, .movie-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(229,9,20,0.3);
+  z-index: 2;
+}
+
+.anime-cover, .movie-cover {
+  position: relative; overflow: hidden;
+  aspect-ratio: 2/3;
+}
+
+.anime-cover img, .movie-cover img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.anime-card:hover .anime-cover img,
+.movie-card:hover .movie-cover img {
+  transform: scale(1.06);
+}
+
+.anime-overlay, .movie-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.anime-card:hover .anime-overlay,
+.movie-card:hover .movie-overlay { opacity: 1; }
+
+.play-icon {
+  width: 52px; height: 52px;
+  background: rgba(229,9,20,0.85);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px var(--red-glow);
+  transform: scale(0.85);
+  transition: transform var(--transition);
+}
+
+.anime-card:hover .play-icon,
+.movie-card:hover .play-icon { transform: scale(1); }
+
+.anime-info, .movie-info-bottom {
+  padding: 12px 14px;
+}
+
+.anime-title, .movie-title {
+  font-size: 0.88rem; font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.anime-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.74rem; color: var(--text-dim);
+  margin: 4px 0;
+}
+.anime-dot { color: var(--text-muted); }
+
+.anime-genres { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+
+.genre-tag {
+  background: rgba(229,9,20,0.12);
+  color: var(--red);
+  font-size: 0.68rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+  border: 1px solid rgba(229,9,20,0.2);
+}
+
+/* Admin badge */
+.badge-new {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--red);
+  font-size: 0.6rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 3px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  z-index: 3;
+}
+
+.badge-admin {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; gap: 6px; z-index: 3;
+}
+
+.admin-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  color: var(--text-dim);
+  transition: var(--transition);
+  font-size: 0.75rem;
+}
+.admin-btn:hover { color: var(--text); }
+.admin-btn.delete:hover { color: var(--red); }
+
+/* ── Status Badge ───────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  font-size: 0.72rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.status-ongoing  { background: rgba(0,200,100,0.15); color: #00c864; border: 1px solid rgba(0,200,100,0.25); }
+.status-finished { background: rgba(100,100,255,0.12); color: #8888ff; border: 1px solid rgba(100,100,255,0.2); }
+
+/* ── Anime Detail ───────────────────────────────────────────── */
+.anime-detail-hero {
+  min-height: 500px;
+  background-size: cover; background-position: center;
+  display: flex; align-items: flex-end;
+  padding: 60px 40px 40px;
+}
+
+.detail-hero-content {
+  display: flex; gap: 36px; align-items: flex-end;
+  max-width: 1200px; width: 100%;
+}
+
+.anime-poster {
+  flex-shrink: 0; width: 200px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  border: 2px solid rgba(255,255,255,0.1);
+}
+.anime-poster img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+
+.anime-details { flex: 1; }
+
+.detail-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  letter-spacing: 0.03em;
+  line-height: 1; margin-bottom: 14px;
+}
+
+.detail-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin-bottom: 14px;
+}
+
+.meta-item {
+  font-size: 0.82rem; color: var(--text-dim);
+}
+
+.detail-genres { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+.genre-badge {
+  background: rgba(229,9,20,0.12);
+  color: var(--red);
+  font-size: 0.78rem; font-weight: 600;
+  padding: 4px 14px; border-radius: 20px;
+  border: 1px solid rgba(229,9,20,0.25);
+  transition: var(--transition);
+}
+.genre-badge:hover { background: rgba(229,9,20,0.25); }
+
+.detail-description {
+  font-size: 0.9rem; color: var(--text-dim);
+  max-width: 600px; line-height: 1.7;
+}
+
+/* Seasons */
+.seasons-section { padding: 48px 40px; }
+
+.seasons-list { display: flex; flex-direction: column; gap: 20px; }
+
+.season-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.season-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+}
+
+.season-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; letter-spacing: 0.08em;
+}
+.season-count { font-size: 0.78rem; color: var(--text-dim); }
+
+.episodes-grid { display: flex; flex-direction: column; }
+
+.episode-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.episode-item:last-child { border-bottom: none; }
+.episode-item:hover { background: var(--bg-hover); }
+
+.episode-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; color: var(--red);
+  min-width: 36px;
+}
+
+.episode-info { flex: 1; }
+.episode-title { font-size: 0.85rem; display: block; }
+.episode-sources { font-size: 0.72rem; color: var(--text-muted); }
+
+.episode-play { color: var(--text-muted); transition: color var(--transition); }
+.episode-item:hover .episode-play { color: var(--red); }
+
+/* ── Watch Page ─────────────────────────────────────────────── */
+.watch-container {
+  display: flex; min-height: calc(100vh - var(--nav-height));
+}
+
+/* Sidebar */
+.watch-sidebar {
+  width: 300px; flex-shrink: 0;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; color: var(--text-dim);
+  margin-bottom: 10px;
+  transition: color var(--transition);
+}
+.back-link:hover { color: var(--red); }
+
+.sidebar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; letter-spacing: 0.05em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.sidebar-episodes { overflow-y: auto; flex: 1; }
+.sidebar-episodes::-webkit-scrollbar { width: 4px; }
+.sidebar-episodes::-webkit-scrollbar-track { background: transparent; }
+.sidebar-episodes::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+.sidebar-season { border-bottom: 1px solid var(--border); }
+
+.sidebar-season-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.03);
+  position: sticky; top: 0;
+}
+.sidebar-season-header h4 { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+.episode-count-badge {
+  background: var(--red);
+  font-size: 0.65rem; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+}
+
+.sidebar-episode {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  transition: background var(--transition), color var(--transition);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.sidebar-episode:hover { background: var(--bg-hover); color: var(--text); }
+.sidebar-episode.active {
+  background: var(--red-dim);
+  color: var(--text);
+  border-left: 3px solid var(--red);
+}
+
+.ep-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem; color: var(--red);
+  min-width: 24px;
+}
+.ep-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Player zone */
+.watch-main { flex: 1; overflow-y: auto; padding: 30px; }
+
+.player-wrapper { max-width: 1100px; margin: 0 auto; }
+
+.player-header { margin-bottom: 16px; }
+.player-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem; letter-spacing: 0.05em;
+}
+
+.video-player {
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  padding-bottom: 56.25%; height: 0;
+  box-shadow: 0 0 60px rgba(229,9,20,0.12);
+}
+
+.video-player iframe {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  border: none;
+}
+
+.no-source {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; color: var(--text-muted);
+}
+
+.sources-selector { margin-top: 20px; }
+.sources-title { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 10px; }
+.sources-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.source-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem; font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.source-btn:hover { border-color: var(--red); color: var(--text); }
+.source-btn.active { background: var(--red-dim); border-color: var(--red); color: var(--text); }
+
+.episode-navigation {
+  display: flex; justify-content: space-between; gap: 16px;
+  margin-top: 24px;
+}
+
+.nav-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem; font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: var(--transition);
+}
+.nav-btn:hover:not(.disabled) {
+  background: var(--bg-hover); border-color: var(--red); color: var(--text);
+}
+.nav-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ── Film Watch ─────────────────────────────────────────────── */
+.film-watch-container { padding: 30px 40px 60px; max-width: 1300px; margin: 0 auto; }
+
+.film-back-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 22px;
+}
+.film-back-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--text-dim); font-size: 0.82rem;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+.film-back-btn:hover { border-color: var(--red); color: var(--text); }
+
+.film-player {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative; padding-bottom: 56.25%; height: 0;
+  background: #000;
+  box-shadow: 0 0 60px rgba(229,9,20,0.14);
+}
+.film-player iframe {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+}
+
+.film-meta { margin-top: 28px; }
+.film-meta h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem; letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.film-tagline { color: var(--text-dim); font-size: 0.88rem; }
+
+/* ── Genre Page ─────────────────────────────────────────────── */
+.genre-section { padding: 50px 40px; }
+
+.genre-header { margin-bottom: 36px; }
+.genre-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.genre-title span { color: var(--red); }
+.genre-count { color: var(--text-dim); font-size: 0.88rem; }
+
+/* ── Search Page ────────────────────────────────────────────── */
+.search-section { padding: 50px 40px; }
+
+.search-container { max-width: 900px; }
+
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem); letter-spacing: 0.04em;
+  margin-bottom: 28px;
+}
+
+.search-form-large { display: flex; gap: 0; margin-bottom: 40px; }
+
+.search-input-large {
+  flex: 1; padding: 13px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 0.95rem;
+  outline: none;
+  transition: var(--transition);
+}
+.search-input-large:focus { border-color: var(--red); background: rgba(255,255,255,0.04); }
+.search-input-large::placeholder { color: var(--text-muted); }
+
+.search-btn-large {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--red); color: white; border: none;
+  padding: 13px 22px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-family: 'Poppins', sans-serif; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.search-btn-large:hover { background: #ff1a24; }
+
+.search-results { margin-top: 10px; }
+.results-title {
+  font-size: 0.88rem; color: var(--text-dim);
+  margin-bottom: 28px;
+}
+
+/* ── Admin Forms ─────────────────────────────────────────────── */
+.admin-page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - var(--nav-height));
+  padding: 40px;
+}
+
+.admin-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-top: 4px solid var(--red);
+  padding: 48px 40px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.admin-box h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem; letter-spacing: 0.06em;
+  color: var(--red); text-align: center;
+  margin-bottom: 30px;
+}
+
+.input-group { margin-bottom: 20px; }
+.input-group label {
+  display: block; margin-bottom: 7px;
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text-dim); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.input-group input {
+  width: 100%; padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 0.9rem;
+  outline: none; transition: var(--transition);
+}
+.input-group input:focus {
+  border-color: var(--red);
+  background: rgba(255,255,255,0.07);
+}
+.input-group input::placeholder { color: var(--text-muted); }
+
+.btn-submit {
+  width: 100%; padding: 14px;
+  background: var(--red); color: white; border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.04em;
+  transition: var(--transition);
+  margin-top: 8px;
+  box-shadow: 0 4px 20px var(--red-glow);
+}
+.btn-submit:hover {
+  background: #ff1a24;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 28px var(--red-glow);
+}
+
+.admin-cancel {
+  display: block; text-align: center; margin-top: 18px;
+  font-size: 0.82rem; color: var(--text-muted);
+  transition: color var(--transition);
+}
+.admin-cancel:hover { color: var(--text); }
+
+/* ── Login Page ─────────────────────────────────────────────── */
+.login-page {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, #1a0505 0%, #050505 70%);
+  padding: 20px;
+}
+
+.login-box {
+  background: rgba(17, 17, 17, 0.92);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--red);
+  border-radius: var(--radius);
+  padding: 56px 44px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+}
+
+.login-logo {
+  text-align: center; margin-bottom: 36px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem; letter-spacing: 3px;
+}
+.login-logo span { color: var(--red); }
+
+.erreur {
+  background: rgba(229,9,20,0.12);
+  border: 1px solid rgba(229,9,20,0.3);
+  color: #ff8888;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.82rem; color: var(--text-muted);
+}
+.login-footer a { color: var(--red); font-weight: 600; }
+.login-footer a:hover { text-decoration: underline; }
+
+/* ── Empty State ────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 80px 20px;
+  color: var(--text-muted); text-align: center;
+}
+.empty-state h3 { font-size: 1.1rem; color: var(--text-dim); }
+.empty-state p  { font-size: 0.85rem; }
+
+/* ── 404 ─────────────────────────────────────────────────────── */
+.error-section {
+  min-height: calc(100vh - var(--nav-height));
+  display: flex; align-items: center; justify-content: center;
+}
+.error-container { text-align: center; padding: 40px; }
+.error-code {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(8rem, 20vw, 14rem);
+  line-height: 1; color: var(--red);
+  text-shadow: 0 0 80px var(--red-glow);
+  letter-spacing: 0.04em;
+}
+.error-title { font-size: 1.6rem; margin-bottom: 12px; }
+.error-message { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 30px; }
+
+.error-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--red); color: white;
+  padding: 12px 24px; border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.9rem;
+  transition: var(--transition);
+}
+.error-cta:hover { background: #ff1a24; transform: translateY(-2px); }
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 48px 40px 30px;
+}
+
+.footer-container {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px; align-items: start;
+}
+
+.footer-logo {
+  display: flex; align-items: baseline; gap: 2px; margin-bottom: 8px;
+}
+.footer-logo .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--red); letter-spacing: 2px; }
+.footer-logo .logo-suffix { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--text); letter-spacing: 2px; }
+.footer-tagline { font-size: 0.8rem; color: var(--text-muted); }
+
+.footer-section h4 {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin-bottom: 14px;
+}
+.footer-section ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-section ul li a {
+  font-size: 0.82rem; color: var(--text-muted);
+  transition: color var(--transition);
+}
+.footer-section ul li a:hover { color: var(--text); }
+
+.footer-copyright {
+  grid-column: 1 / -1;
+  padding-top: 24px; border-top: 1px solid var(--border);
+  font-size: 0.76rem; color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Suggestion Box ─────────────────────────────────────────── */
+.suggestion-box {
+  margin-top: 28px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+}
+
+.suggestion-box h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem; letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.suggestion-box h3 i { color: var(--gold); font-size: 0.9em; }
+
+.suggestion-form {
+  display: flex; gap: 10px; align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.suggestion-textarea {
+  flex: 1; min-width: 200px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 0.85rem;
+  padding: 10px 14px;
+  resize: none; height: 44px; line-height: 1.5;
+  outline: none; transition: var(--transition);
+}
+.suggestion-textarea:focus {
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.07);
+  height: 88px;
+}
+.suggestion-textarea::placeholder { color: var(--text-muted); }
+
+.suggestion-btn {
+  background: var(--gold);
+  color: #111;
+  border: none; cursor: pointer;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 700;
+  white-space: nowrap;
+  transition: var(--transition);
+  display: flex; align-items: center; gap: 7px;
+}
+.suggestion-btn:hover { background: #ffe033; transform: translateY(-1px); }
+.suggestion-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.suggestion-feedback {
+  font-size: 0.78rem; margin-top: 8px; min-height: 18px;
+  display: flex; align-items: center; gap: 6px;
+}
+.suggestion-feedback.ok    { color: #46d369; }
+.suggestion-feedback.error { color: #ff8888; }
+
+/* ── Compact Episode Picker (sidebar) ──────────────────────── */
+.ep-picker-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.ep-season-select {
+  color: #000000; /* Remplace var(--text) par du noir pur */
+  background: #ffffff; /* Un fond blanc solide au lieu de l'alpha 0.06 */
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Poppins', sans-serif; font-size: 0.82rem;
+  padding: 8px 12px;
+  outline: none; cursor: pointer;
+  transition: var(--transition);
+}
+.ep-season-select:focus, .ep-season-select:hover { border-color: var(--red); }
+
+.ep-search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif; font-size: 0.8rem;
+  padding: 7px 12px;
+  outline: none;
+  transition: var(--transition);
+}
+.ep-search-input:focus { border-color: var(--red); background: rgba(255,255,255,0.07); }
+.ep-search-input::placeholder { color: var(--text-muted); }
+
+.ep-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  padding: 14px;
+  overflow-y: auto;
+  max-height: calc(100vh - var(--nav-height) - 160px);
+}
+.ep-grid::-webkit-scrollbar { width: 4px; }
+.ep-grid::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+
+.ep-chip {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem; letter-spacing: 0.04em;
+  color: var(--text-dim);
+  transition: var(--transition);
+}
+.ep-chip:hover {
+  background: rgba(229,9,20,0.15);
+  border-color: var(--red);
+  color: var(--text);
+}
+.ep-chip.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+  box-shadow: 0 2px 10px var(--red-glow);
+}
+.ep-chip.hidden { display: none; }
+
+/* ── Animations ─────────────────────────────────────────────── */
+.animate-in { animation: fade-up 0.7s ease both; }
+.delay-1 { animation-delay: 0.15s; }
+.delay-2 { animation-delay: 0.3s; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .nav-search { display: none; }
+  .nav-menu   { display: none; }
+}
+
+@media (max-width: 768px) {
+  :root { --nav-height: 60px; }
+
+  .nav-container { padding: 0 20px; gap: 16px; }
+  .nav-user .nav-username { display: none; }
+
+  .hero { padding: 60px 20px 40px; min-height: 340px; }
+  .hero-decoration { display: none; }
+
+  .section-header { padding: 32px 20px 16px; }
+  .section-container, .seasons-section { padding: 0 20px 40px; }
+  .animes-grid, .movies-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); padding: 0 20px; }
+  .genre-section, .search-section { padding: 30px 20px; }
+
+  .watch-container { flex-direction: column; }
+  .watch-sidebar { width: 100%; max-height: 280px; border-right: none; border-bottom: 1px solid var(--border); }
+  .watch-main { padding: 20px; }
+
+  .detail-hero-content { flex-direction: column; gap: 20px; }
+  .anime-poster { width: 140px; }
+
+  .footer-container { grid-template-columns: 1fr; gap: 24px; }
+  .film-watch-container { padding: 20px; }
+}
