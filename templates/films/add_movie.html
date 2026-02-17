@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Ajouter un film — ITHFlix{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <div class="admin-box">
+    <h2><i class="fa-solid fa-clapperboard" style="margin-right:8px;"></i>Ajouter un film</h2>
+
+    <form method="POST">
+      <div class="input-group">
+        <label>Titre du film</label>
+        <input type="text" name="title" placeholder="Ex : Inception" required>
+      </div>
+      <div class="input-group">
+        <label>URL Source (vidéo)</label>
+        <input type="text" name="source" placeholder="Lien .mp4 ou iframe embed" required>
+      </div>
+      <div class="input-group">
+        <label>URL Affiche (cover)</label>
+        <input type="text" name="cover" placeholder="Lien vers l'image JPG/PNG" required>
+      </div>
+      <button type="submit" class="btn-submit">Ajouter au catalogue</button>
+    </form>
+
+    <a href="{{ url_for('flix_index') }}" class="admin-cancel">← Annuler</a>
+  </div>
+</div>
+{% endblock %}

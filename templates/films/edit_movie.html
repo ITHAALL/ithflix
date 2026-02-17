@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Modifier {{ movie.title }} — ITHFlix{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <div class="admin-box">
+    <h2><i class="fa-solid fa-pen" style="margin-right:8px;"></i>Modifier le film</h2>
+
+    <form method="POST">
+      <div class="input-group">
+        <label>Titre du film</label>
+        <input type="text" name="title" value="{{ movie.title }}" required>
+      </div>
+      <div class="input-group">
+        <label>URL Source (vidéo)</label>
+        <input type="text" name="source" value="{{ movie.source }}" required>
+      </div>
+      <div class="input-group">
+        <label>URL Affiche (cover)</label>
+        <input type="text" name="cover" value="{{ movie.cover }}" required>
+      </div>
+      <button type="submit" class="btn-submit">Enregistrer les modifications</button>
+    </form>
+
+    <a href="{{ url_for('flix_index') }}" class="admin-cancel">← Annuler</a>
+  </div>
+</div>
+{% endblock %}

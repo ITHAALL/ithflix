@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ movie.title }} — ITH-Hub{% endblock %}
+
+{% block content %}
+<div class="film-watch-container">
+
+  <div class="film-back-bar">
+    <a href="{{ url_for('flix_index') }}" class="film-back-btn">
+      <i class="fa-solid fa-chevron-left"></i> Retour au catalogue
+    </a>
+    <span style="color:var(--text-muted);font-size:0.8rem;">/ {{ movie.title }}</span>
+  </div>
+
+  <div class="film-player">
+    <iframe
+      src="{{ video_url }}"
+      allowfullscreen="true"
+      scrolling="no"
+      allow="autoplay; encrypted-media">
+    </iframe>
+  </div>
+
+  <div class="film-meta">
+    <h1>{{ movie.title }}</h1>
+    <p class="film-tagline">
+      Vous regardez <strong>{{ movie.title }}</strong> sans publicité ni pop-up sur ITH-Hub.
+    </p>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="suggestion-box">
+    <h3><i class="fa-solid fa-lightbulb"></i> Faire une suggestion</h3>
+    <div class="suggestion-form">
+      <textarea id="sug-text" class="suggestion-textarea"
+                placeholder="Un film à ajouter, une source manquante, un bug… Dites-nous tout !"></textarea>
+      <button class="suggestion-btn" id="sug-btn" onclick="sendSuggestion()">
+        <i class="fa-solid fa-paper-plane"></i> Envoyer
+      </button>
+    </div>
+    <div class="suggestion-feedback" id="sug-feedback"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function sendSuggestion() {
+  const text = document.getElementById('sug-text').value.trim();
+  const btn  = document.getElementById('sug-btn');
+  const fb   = document.getElementById('sug-feedback');
+
+  if (!text) {
+    fb.className = 'suggestion-feedback error';
+    fb.textContent = "⚠ Écrivez quelque chose avant d'envoyer.";
+    return;
+  }
+
+  btn.disabled = true;
+  fb.className = 'suggestion-feedback';
+  fb.textContent = 'Envoi en cours…';
+
+  try {
+    const res  = await fetch('/api/suggestion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contenu:   text,
+        section:   'Film',
+        titre_ref: '{{ movie.title | e }}'
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      fb.className = 'suggestion-feedback ok';
+      fb.innerHTML = '<i class="fa-solid fa-check"></i> Suggestion envoyée, merci !';
+      document.getElementById('sug-text').value = '';
+    } else {
+      throw new Error(data.error || 'Erreur serveur');
+    }
+  } catch (e) {
+    fb.className = 'suggestion-feedback error';
+    fb.textContent = '✗ Échec : ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Recherche Films{% if query %} — {{ query }}{% endif %} — ITH-Hub{% endblock %}
+
+{% block content %}
+<section class="search-section">
+  <div class="search-container">
+    <h1 class="page-title">Recherche Films</h1>
+
+    <form action="{{ url_for('film_search') }}" method="get" class="search-form-large">
+      <input type="text" name="q"
+             placeholder="Rechercher un film…"
+             class="search-input-large"
+             value="{{ query }}"
+             autofocus>
+      <button type="submit" class="search-btn-large">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Rechercher
+      </button>
+    </form>
+
+    {% if query %}
+    <div class="search-results">
+      <p class="results-title">
+        {% if movies %}
+          {{ movies|length }} résultat{{ 's' if movies|length > 1 else '' }} pour <strong>"{{ query }}"</strong>
+        {% else %}
+          Aucun résultat pour <strong>"{{ query }}"</strong>
+        {% endif %}
+      </p>
+
+      {% if movies %}
+      <div class="movies-grid">
+        {% for m in movies %}
+        <a href="{{ url_for('watch_movie', movie_id=m['_id']|string) }}" class="movie-card">
+          <div class="movie-cover">
+            <img src="{{ m.cover }}" alt="{{ m.title }}" loading="lazy">
+            <div class="movie-overlay">
+              <span class="play-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="movie-info-bottom">
+            <h3 class="movie-title">{{ m.title }}</h3>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="empty-state">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h3>Aucun résultat trouvé</h3>
+        <p>Essayez avec un autre terme de recherche.</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
