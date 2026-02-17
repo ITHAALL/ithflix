@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ITHFlix{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <div class="grain-overlay"></div>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar">
+    <div class="nav-container">
+
+      <!-- Logo -->
+      <a href="{{ url_for('flix_index') }}" class="nav-logo">
+        <span class="logo-text">ITH</span>
+        <span class="logo-suffix">FLIX</span>
+      </a>
+
+      <!-- Section Tabs -->
+      <div class="nav-tabs">
+        <a href="{{ url_for('flix_index') }}"
+           class="nav-tab {% if request.endpoint and request.endpoint.startswith('flix') or request.endpoint in ['watch_movie','add_movie','edit_movie','delete_movie'] %}active{% endif %}">
+          <i class="fa-solid fa-film" style="margin-right:6px;font-size:0.75em;"></i>Films
+        </a>
+        <a href="{{ url_for('animes_index') }}"
+           class="nav-tab {% if request.endpoint and request.endpoint.startswith('anime') or request.endpoint == 'watch_anime' %}active{% endif %}">
+          <i class="fa-solid fa-dragon" style="margin-right:6px;font-size:0.75em;"></i>Animes
+        </a>
+      </div>
+
+      <!-- Contextual nav links (animes only) -->
+      {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}
+      <div class="nav-menu">
+        <a href="{{ url_for('anime_genre', genre_name='Action') }}" class="nav-link">Action</a>
+        <a href="{{ url_for('anime_genre', genre_name='Shonen') }}" class="nav-link">Shonen</a>
+        <a href="{{ url_for('anime_genre', genre_name='Romance') }}" class="nav-link">Romance</a>
+      </div>
+      {% endif %}
+
+      <!-- Search (animes section) -->
+      {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}
+      <div class="nav-search" style="margin-left:auto;">
+        <form action="{{ url_for('anime_search') }}" method="get" class="search-form">
+          <input type="text" name="q" placeholder="Rechercher un anime..."
+                 class="search-input" value="{{ request.args.get('q', '') }}">
+          <button type="submit" class="search-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+      <!-- User menu -->
+      <div class="nav-user" {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}style="margin-left:16px;"{% else %}style="margin-left:auto;"{% endif %}>
+        <span class="nav-username"><i class="fa-solid fa-circle-user" style="color:var(--red);margin-right:5px;"></i><span>{{ session.get('user', '') }}</span></span>
+        <a href="{{ url_for('logout') }}" class="nav-logout">Déconnexion</a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ── Content ── -->
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-text">ITH</span>
+          <span class="logo-suffix">HUB</span>
+        </div>
+        <p class="footer-tagline">Films &amp; Animes sans pub</p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-section">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="{{ url_for('flix_index') }}">Films</a></li>
+            <li><a href="{{ url_for('animes_index') }}">Animes</a></li>
+            <li><a href="{{ url_for('anime_search') }}">Recherche</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Genres</h4>
+          <ul>
+            <li><a href="{{ url_for('anime_genre', genre_name='Action') }}">Action</a></li>
+            <li><a href="{{ url_for('anime_genre', genre_name='Shonen') }}">Shonen</a></li>
+            <li><a href="{{ url_for('anime_genre', genre_name='Romance') }}">Romance</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-copyright">
+        <p>&copy; 2026 ITHFlix — Tous droits réservés.</p>
+      </div>
+    </div>
+  </footer>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

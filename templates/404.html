@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Page introuvable — ITHFlix{% endblock %}
+
+{% block content %}
+<section class="error-section">
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Page introuvable</h1>
+    <p class="error-message">La page que vous recherchez n'existe pas ou a été déplacée.</p>
+    <a href="{{ url_for('flix_index') }}" class="error-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Retour à l'accueil
+    </a>
+  </div>
+</section>
+{% endblock %}
