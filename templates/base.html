@@ -4,11 +4,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}ITHFlix{% endblock %}</title>
+  <!-- Favicon / Logo dans l'onglet -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23e50914'/><text y='.9em' font-size='60' font-family='Arial Black,Arial' font-weight='900' fill='white' x='50%25' text-anchor='middle' dominant-baseline='auto' dy='22'>ITH</text></svg>">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ── Autocomplete ── */
+    .autocomplete-wrapper { position: relative; flex: 1; }
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm, 8px);
+      overflow: hidden;
+      z-index: 9999;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .autocomplete-dropdown:empty { display: none; }
+    .ac-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-decoration: none;
+      color: #f0f0f0;
+      font-size: 0.88rem;
+    }
+    .ac-item:hover, .ac-item.ac-focused { background: rgba(229,9,20,0.18); }
+    .ac-icon { font-size: 1.1em; min-width: 22px; text-align: center; }
+    .ac-label { flex: 1; font-weight: 500; }
+    .ac-type {
+      font-size: 0.72rem;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 2px 7px;
+      color: #aaa;
+      white-space: nowrap;
+    }
+    .ac-highlight { color: var(--red, #e50914); font-weight: 700; }
+    .ac-empty { padding: 14px; color: #888; font-size: 0.85rem; text-align: center; }
+  </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -28,11 +73,15 @@
       <!-- Section Tabs -->
       <div class="nav-tabs">
         <a href="{{ url_for('flix_index') }}"
-           class="nav-tab {% if request.endpoint and request.endpoint.startswith('flix') or request.endpoint in ['watch_movie','add_movie','edit_movie','delete_movie'] %}active{% endif %}">
+           class="nav-tab {% if request.endpoint and (request.endpoint.startswith('flix') or request.endpoint in ['watch_movie','add_movie','edit_movie','delete_movie','film_search']) %}active{% endif %}">
           <i class="fa-solid fa-film" style="margin-right:6px;font-size:0.75em;"></i>Films
         </a>
+        <a href="{{ url_for('series_index') }}"
+           class="nav-tab {% if request.endpoint and (request.endpoint.startswith('serie') or request.endpoint in ['watch_serie','add_serie','edit_serie','delete_serie']) %}active{% endif %}">
+          <i class="fa-solid fa-tv" style="margin-right:6px;font-size:0.75em;"></i>Séries
+        </a>
         <a href="{{ url_for('animes_index') }}"
-           class="nav-tab {% if request.endpoint and request.endpoint.startswith('anime') or request.endpoint == 'watch_anime' %}active{% endif %}">
+           class="nav-tab {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}active{% endif %}">
           <i class="fa-solid fa-dragon" style="margin-right:6px;font-size:0.75em;"></i>Animes
         </a>
       </div>
@@ -46,12 +95,21 @@
       </div>
       {% endif %}
 
-      <!-- Search (animes section) -->
-      {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}
+      <!-- Barre de recherche universelle avec auto-complétion -->
+      {% set _section = 'films' if (request.endpoint and (request.endpoint.startswith('flix') or request.endpoint in ['watch_movie','film_search'])) else ('series' if (request.endpoint and request.endpoint.startswith('serie')) else ('animes' if (request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime')) else 'all')) %}
+      {% set _action   = url_for('film_search') if _section == 'films' else (url_for('serie_search') if _section == 'series' else url_for('anime_search')) %}
+      {% set _placeholder = 'Rechercher un film…' if _section == 'films' else ('Rechercher une série…' if _section == 'series' else 'Rechercher un anime…') %}
       <div class="nav-search" style="margin-left:auto;">
-        <form action="{{ url_for('anime_search') }}" method="get" class="search-form">
-          <input type="text" name="q" placeholder="Rechercher un anime..."
-                 class="search-input" value="{{ request.args.get('q', '') }}">
+        <form action="{{ _action }}" method="get" class="search-form" autocomplete="off" id="nav-search-form">
+          <div class="autocomplete-wrapper">
+            <input type="text" name="q" placeholder="{{ _placeholder }}"
+                   class="search-input"
+                   id="nav-search-input"
+                   data-section="{{ _section }}"
+                   value="{{ request.args.get('q', '') }}"
+                   autocomplete="off">
+            <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+          </div>
           <button type="submit" class="search-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -59,10 +117,9 @@
           </button>
         </form>
       </div>
-      {% endif %}
 
       <!-- User menu -->
-      <div class="nav-user" {% if request.endpoint and (request.endpoint.startswith('anime') or request.endpoint == 'watch_anime') %}style="margin-left:16px;"{% else %}style="margin-left:auto;"{% endif %}>
+      <div class="nav-user" style="margin-left:16px;">
         <span class="nav-username"><i class="fa-solid fa-circle-user" style="color:var(--red);margin-right:5px;"></i><span>{{ session.get('user', '') }}</span></span>
         <a href="{{ url_for('logout') }}" class="nav-logout">Déconnexion</a>
       </div>
@@ -83,7 +140,7 @@
           <span class="logo-text">ITH</span>
           <span class="logo-suffix">HUB</span>
         </div>
-        <p class="footer-tagline">Films &amp; Animes sans pub</p>
+        <p class="footer-tagline">Films, Séries &amp; Animes sans pub</p>
       </div>
 
       <div class="footer-links">
@@ -91,8 +148,8 @@
           <h4>Navigation</h4>
           <ul>
             <li><a href="{{ url_for('flix_index') }}">Films</a></li>
+            <li><a href="{{ url_for('series_index') }}">Séries</a></li>
             <li><a href="{{ url_for('animes_index') }}">Animes</a></li>
-            <li><a href="{{ url_for('anime_search') }}">Recherche</a></li>
           </ul>
         </div>
         <div class="footer-section">
@@ -110,6 +167,111 @@
       </div>
     </div>
   </footer>
+
+  <!-- ── Autocomplete Script ── -->
+  <script>
+  (function() {
+    const input    = document.getElementById('nav-search-input');
+    const dropdown = document.getElementById('ac-dropdown');
+    if (!input || !dropdown) return;
+
+    let debounceTimer = null;
+    let focusedIndex  = -1;
+    let currentItems  = [];
+
+    function highlight(text, query) {
+      if (!query) return text;
+      const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return text.replace(re, '<span class="ac-highlight">$1</span>');
+    }
+
+    function renderItems(items, query) {
+      currentItems = items;
+      focusedIndex = -1;
+      dropdown.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        if (query.length > 0) {
+          dropdown.innerHTML = '<div class="ac-empty">Aucun résultat</div>';
+        }
+        return;
+      }
+
+      items.forEach((item, idx) => {
+        const a = document.createElement('a');
+        a.className = 'ac-item';
+        a.href = item.url;
+        a.innerHTML = `
+          <span class="ac-icon">${item.icon}</span>
+          <span class="ac-label">${highlight(item.label, query)}</span>
+          <span class="ac-type">${item.type}</span>
+        `;
+        a.addEventListener('mouseenter', () => setFocus(idx));
+        dropdown.appendChild(a);
+      });
+    }
+
+    function setFocus(idx) {
+      const items = dropdown.querySelectorAll('.ac-item');
+      items.forEach(i => i.classList.remove('ac-focused'));
+      if (idx >= 0 && idx < items.length) {
+        items[idx].classList.add('ac-focused');
+        focusedIndex = idx;
+      }
+    }
+
+    function closeDropdown() {
+      dropdown.innerHTML = '';
+      focusedIndex = -1;
+      currentItems = [];
+    }
+
+    async function fetchSuggestions(q) {
+      const section = input.dataset.section || 'all';
+      try {
+        const res  = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}&section=${section}`);
+        const data = await res.json();
+        renderItems(data, q);
+      } catch (e) {
+        closeDropdown();
+      }
+    }
+
+    input.addEventListener('input', function() {
+      const q = this.value.trim();
+      clearTimeout(debounceTimer);
+      if (q.length < 1) { closeDropdown(); return; }
+      debounceTimer = setTimeout(() => fetchSuggestions(q), 200);
+    });
+
+    input.addEventListener('keydown', function(e) {
+      const items = dropdown.querySelectorAll('.ac-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocus(Math.min(focusedIndex + 1, items.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocus(Math.max(focusedIndex - 1, 0));
+      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+        e.preventDefault();
+        const focused = dropdown.querySelector('.ac-focused');
+        if (focused) window.location.href = focused.href;
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.autocomplete-wrapper') && !e.target.closest('.search-btn')) {
+        closeDropdown();
+      }
+    });
+
+    input.addEventListener('focus', function() {
+      if (this.value.trim().length >= 1) fetchSuggestions(this.value.trim());
+    });
+  })();
+  </script>
 
   {% block extra_js %}{% endblock %}
 </body>
