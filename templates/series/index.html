@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Séries — ITH-Hub{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title animate-in">
+      Catalogue<br>
+      <span class="highlight">Séries</span>
+    </h1>
+    <p class="hero-subtitle animate-in delay-1">
+      Toutes vos séries préférées, saison par saison, sans pub.
+    </p>
+    <a href="#catalogue" class="hero-cta animate-in delay-2">
+      Voir le catalogue
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
+  <div class="hero-decoration">
+    <div class="deco-circle"></div>
+    <div class="deco-circle"></div>
+    <div class="deco-circle"></div>
+  </div>
+</section>
+
+{% if session.get('is_admin') %}
+<div style="padding: 0 40px 0; display:flex; justify-content:flex-end;">
+  <a href="{{ url_for('add_serie') }}" style="
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--red);color:white;
+    padding:9px 18px;border-radius:var(--radius-sm);
+    font-size:0.82rem;font-weight:600;">
+    <i class="fa-solid fa-plus"></i> Ajouter une série
+  </a>
+</div>
+{% endif %}
+
+<section id="catalogue">
+  <div class="section-header">
+    <h2 class="section-title">Catalogue Séries</h2>
+    <div class="title-underline"></div>
+  </div>
+
+  {% if series %}
+  <div class="animes-grid">
+    {% for s in series %}
+    <a href="{{ url_for('serie_detail', serie_id=s['_id']|string) }}" class="anime-card" style="position:relative;">
+      {% if session.get('is_admin') %}
+      <div class="badge-admin" onclick="event.preventDefault();">
+        <a href="{{ url_for('edit_serie', id=s['_id']|string) }}" class="admin-btn" title="Modifier">
+          <i class="fa-solid fa-pen"></i>
+        </a>
+        <a href="{{ url_for('delete_serie', id=s['_id']|string) }}"
+           class="admin-btn delete" title="Supprimer"
+           onclick="event.stopPropagation(); return confirm('Supprimer cette série ?')">
+          <i class="fa-solid fa-trash"></i>
+        </a>
+      </div>
+      {% endif %}
+      {% if loop.first %}<div class="badge-new">Nouveau</div>{% endif %}
+
+      <div class="anime-cover">
+        <img src="{{ s.cover }}" alt="{{ s.title|flag_title }}" loading="lazy">
+        <div class="anime-overlay">
+          <span class="play-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </div>
+      </div>
+      <div class="anime-info">
+        <h3 class="anime-title">{{ s.title|flag_title }}</h3>
+        <div class="anime-meta">
+          <span class="anime-seasons">{{ s.seasons|length }} saison{{ 's' if s.seasons|length > 1 else '' }}</span>
+          <span class="anime-dot">•</span>
+          <span class="anime-episodes">{{ s.seasons|total_episodes }} ép.</span>
+        </div>
+        {% if s.genres %}
+        <div class="anime-genres">
+          {% for genre in s.genres[:3] %}
+          <span class="genre-tag">{{ genre }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <i class="fa-solid fa-tv" style="font-size:3rem;opacity:.2;"></i>
+    <h3>Aucune série disponible</h3>
+    <p>Le catalogue est vide pour l'instant.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
