@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}{{ serie.title|flag_title }} S{{ season_num }}E{{ episode_num }} — ITH-Hub{% endblock %}
+
+{% block content %}
+<div class="watch-container">
+
+  <!-- ── Sidebar ── -->
+  <aside class="watch-sidebar">
+    <div class="sidebar-header">
+      <a href="{{ url_for('serie_detail', serie_id=serie['_id']|string) }}" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Retour
+      </a>
+      <h3 class="sidebar-title">{{ serie.title|flag_title }}</h3>
+    </div>
+
+    <!-- Sélecteur saison + filtre épisode -->
+    <div class="ep-picker-header">
+      {% if all_seasons|length > 1 %}
+      <select class="ep-season-select" id="season-select" onchange="changeSeason(this.value)">
+        {% for s in all_seasons|sort(attribute='season_number') %}
+        <option value="{{ s.season_number }}"
+          {% if s.season_number == season_num %}selected{% endif %}>
+          Saison {{ s.season_number }} — {{ s.total_episodes }} ép.
+        </option>
+        {% endfor %}
+      </select>
+      {% endif %}
+      <input type="text" class="ep-search-input" id="ep-filter"
+             placeholder="Filtrer épisode…" oninput="filterEpisodes(this.value)">
+    </div>
+
+    <!-- Grilles d'épisodes par saison -->
+    {% for s in all_seasons|sort(attribute='season_number') %}
+    <div class="ep-grid" id="season-grid-{{ s.season_number }}"
+         {% if s.season_number != season_num %}style="display:none"{% endif %}>
+      {% for ep in s.episodes|sort(attribute='episode_number') %}
+      <a href="{{ url_for('watch_serie', serie_id=serie['_id']|string, season_num=s.season_number, episode_num=ep.episode_number) }}"
+         class="ep-chip {% if s.season_number == season_num and ep.episode_number == episode_num %}active{% endif %}"
+         data-num="{{ ep.episode_number }}"
+         title="Épisode {{ ep.episode_number }}">
+        {{ ep.episode_number }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </aside>
+
+  <!-- ── Zone lecteur ── -->
+  <main class="watch-main">
+    <div class="player-wrapper">
+      <div class="player-header">
+        <h2 class="player-title">Saison {{ season_num }} • Épisode {{ episode_num }}</h2>
+      </div>
+
+      <div class="video-player">
+        {% if episode.sources %}
+        <iframe
+          id="video-player"
+          src="{{ episode.sources[0] }}"
+          frameborder="0"
+          allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+        </iframe>
+        {% else %}
+        <div class="no-source">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>Aucune source disponible pour cet épisode.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if episode.sources|length > 1 %}
+      <div class="sources-selector">
+        <h3 class="sources-title">Sources disponibles</h3>
+        <div class="sources-buttons">
+          {% for source in episode.sources %}
+          <button class="source-btn {% if loop.index == 1 %}active{% endif %}"
+                  onclick="changeSource('{{ source }}', this)">
+            Source {{ loop.index }}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Navigation épisodes -->
+      <div class="episode-navigation">
+        {% set prev_ep = episode_num - 1 %}
+        {% set next_ep = episode_num + 1 %}
+
+        {% if prev_ep >= 1 %}
+        <a href="{{ url_for('watch_serie', serie_id=serie['_id']|string, season_num=season_num, episode_num=prev_ep) }}" class="nav-btn prev-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Épisode précédent
+        </a>
+        {% else %}
+        <div class="nav-btn prev-btn disabled">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Épisode précédent
+        </div>
+        {% endif %}
+
+        {% set current_season = all_seasons | selectattr('season_number', 'equalto', season_num) | first %}
+        {% if next_ep <= current_season.total_episodes %}
+        <a href="{{ url_for('watch_serie', serie_id=serie['_id']|string, season_num=season_num, episode_num=next_ep) }}" class="nav-btn next-btn">
+          Épisode suivant
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        {% else %}
+        <div class="nav-btn next-btn disabled">
+          Épisode suivant
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Suggestions -->
+      <div class="suggestion-box">
+        <h3><i class="fa-solid fa-lightbulb"></i> Faire une suggestion</h3>
+        <div class="suggestion-form">
+          <textarea id="sug-text" class="suggestion-textarea"
+                    placeholder="Un épisode manquant, un lien cassé, une série à ajouter…"></textarea>
+          <button class="suggestion-btn" id="sug-btn" onclick="sendSuggestion()">
+            <i class="fa-solid fa-paper-plane"></i> Envoyer
+          </button>
+        </div>
+        <div class="suggestion-feedback" id="sug-feedback"></div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeSource(source, button) {
+  document.getElementById('video-player').src = source;
+  document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+  button.classList.add('active');
+}
+
+function changeSeason(num) {
+  document.querySelectorAll('.ep-grid').forEach(g => g.style.display = 'none');
+  const grid = document.getElementById('season-grid-' + num);
+  if (grid) grid.style.display = 'grid';
+  const fi = document.getElementById('ep-filter');
+  if (fi) { fi.value = ''; filterEpisodes(''); }
+}
+
+function filterEpisodes(val) {
+  document.querySelectorAll('.ep-grid').forEach(grid => {
+    if (grid.style.display === 'none') return;
+    grid.querySelectorAll('.ep-chip').forEach(chip => {
+      chip.classList.toggle('hidden', val !== '' && !chip.dataset.num.includes(val));
+    });
+  });
+}
+
+async function sendSuggestion() {
+  const text = document.getElementById('sug-text').value.trim();
+  const btn  = document.getElementById('sug-btn');
+  const fb   = document.getElementById('sug-feedback');
+  if (!text) {
+    fb.className = 'suggestion-feedback error';
+    fb.textContent = "⚠ Écrivez quelque chose avant d'envoyer.";
+    return;
+  }
+  btn.disabled = true;
+  fb.className = 'suggestion-feedback';
+  fb.textContent = 'Envoi en cours…';
+  try {
+    const res  = await fetch('/api/suggestion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contenu:   text,
+        section:   'Série',
+        titre_ref: '{{ serie.title|e }} S{{ season_num }}E{{ episode_num }}'
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      fb.className = 'suggestion-feedback ok';
+      fb.innerHTML = '<i class="fa-solid fa-check"></i> Suggestion envoyée, merci !';
+      document.getElementById('sug-text').value = '';
+    } else throw new Error(data.error || 'Erreur serveur');
+  } catch (e) {
+    fb.className = 'suggestion-feedback error';
+    fb.textContent = '✗ Échec : ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const active = document.querySelector('.ep-chip.active');
+  if (active) active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+});
+</script>
+{% endblock %}
