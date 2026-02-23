@@ -6,12 +6,17 @@
   <div class="search-container">
     <h1 class="page-title">Recherche Films</h1>
 
-    <form action="{{ url_for('film_search') }}" method="get" class="search-form-large">
-      <input type="text" name="q"
-             placeholder="Rechercher un film…"
-             class="search-input-large"
-             value="{{ query }}"
-             autofocus>
+    <form action="{{ url_for('film_search') }}" method="get" class="search-form-large" autocomplete="off">
+      <div class="autocomplete-wrapper" style="flex:1;">
+        <input type="text" name="q"
+               placeholder="Rechercher un film…"
+               class="search-input-large"
+               id="page-search-input"
+               data-section="films"
+               value="{{ query }}"
+               autofocus autocomplete="off">
+        <div class="autocomplete-dropdown" id="ac-dropdown-page"></div>
+      </div>
       <button type="submit" class="search-btn-large">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -43,7 +48,7 @@
             </div>
           </div>
           <div class="movie-info-bottom">
-            <h3 class="movie-title">{{ m.title }}</h3>
+            <h3 class="movie-title">{{ m.title|flag_title }}</h3>
           </div>
         </a>
         {% endfor %}
@@ -62,4 +67,74 @@
     {% endif %}
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const input    = document.getElementById('page-search-input');
+  const dropdown = document.getElementById('ac-dropdown-page');
+  if (!input || !dropdown) return;
+
+  let debounceTimer = null;
+  let focusedIndex  = -1;
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return text.replace(re, '<span class="ac-highlight">$1</span>');
+  }
+
+  function renderItems(items, query) {
+    focusedIndex = -1;
+    dropdown.innerHTML = '';
+    if (!items || items.length === 0) {
+      if (query.length > 0) dropdown.innerHTML = '<div class="ac-empty">Aucun résultat</div>';
+      return;
+    }
+    items.forEach((item, idx) => {
+      const a = document.createElement('a');
+      a.className = 'ac-item';
+      a.href = item.url;
+      a.innerHTML = `<span class="ac-icon">${item.icon}</span><span class="ac-label">${highlight(item.label, query)}</span><span class="ac-type">${item.type}</span>`;
+      a.addEventListener('mouseenter', () => setFocus(idx));
+      dropdown.appendChild(a);
+    });
+  }
+
+  function setFocus(idx) {
+    const items = dropdown.querySelectorAll('.ac-item');
+    items.forEach(i => i.classList.remove('ac-focused'));
+    if (idx >= 0 && idx < items.length) { items[idx].classList.add('ac-focused'); focusedIndex = idx; }
+  }
+
+  function closeDropdown() { dropdown.innerHTML = ''; focusedIndex = -1; }
+
+  async function fetchSuggestions(q) {
+    try {
+      const res  = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}&section=films`);
+      const data = await res.json();
+      renderItems(data, q);
+    } catch (e) { closeDropdown(); }
+  }
+
+  input.addEventListener('input', function() {
+    const q = this.value.trim();
+    clearTimeout(debounceTimer);
+    if (q.length < 1) { closeDropdown(); return; }
+    debounceTimer = setTimeout(() => fetchSuggestions(q), 200);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    const items = dropdown.querySelectorAll('.ac-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocus(Math.min(focusedIndex + 1, items.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setFocus(Math.max(focusedIndex - 1, 0)); }
+    else if (e.key === 'Enter' && focusedIndex >= 0) { e.preventDefault(); const f = dropdown.querySelector('.ac-focused'); if (f) window.location.href = f.href; }
+    else if (e.key === 'Escape') closeDropdown();
+  });
+
+  document.addEventListener('click', function(e) { if (!e.target.closest('.autocomplete-wrapper')) closeDropdown(); });
+  input.addEventListener('focus', function() { if (this.value.trim().length >= 1) fetchSuggestions(this.value.trim()); });
+})();
+</script>
 {% endblock %}
