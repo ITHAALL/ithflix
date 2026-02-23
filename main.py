@@ -21,9 +21,10 @@ client = MongoClient(os.getenv("MONGODB_URI"), server_api=ServerApi('1'))
 db_chat  = client["ithchat"]
 db_flix  = client["ithflix"]
 
-accounts          = db_chat["accounts"]
-movies_collection = db_flix["movies"]
-animes_collection = db_flix["animes"]
+accounts           = db_chat["accounts"]
+movies_collection  = db_flix["movies"]
+animes_collection  = db_flix["animes"]
+series_collection  = db_flix["series"]
 
 
 # ============================================================================
@@ -71,6 +72,13 @@ def send_discord_embed(webhook_url, title, description, color=0x007bff):
         return False
 
 
+def format_title_with_flag(title):
+    if not title:
+        return title
+    title = title.replace("[VF]", "🇫🇷").replace("[VOSTFR]", "🇺🇸")
+    return title
+
+
 # ============================================================================
 # FILTRES JINJA
 # ============================================================================
@@ -78,6 +86,11 @@ def send_discord_embed(webhook_url, title, description, color=0x007bff):
 @app.template_filter("total_episodes")
 def total_episodes_filter(seasons):
     return sum(s.get("total_episodes", 0) for s in seasons)
+
+
+@app.template_filter("flag_title")
+def flag_title_filter(title):
+    return format_title_with_flag(title)
 
 
 # ============================================================================
@@ -192,15 +205,125 @@ def film_search():
     return render_template("films/search.html", query=query, movies=movies)
 
 
+# ============================================================================
+# SÉRIES  —  structure identique aux animes
+#   doc: { title, cover, genres, status, description, seasons: [
+#            { season_number, total_episodes, episodes: [
+#                { episode_number, title, sources: [url] }
+#            ]}
+#         ]}
+# ============================================================================
+
+@app.route("/series")
+@login_required
+def series_index():
+    all_series = list(series_collection.find(
+        {},
+        {"title": 1, "cover": 1, "genres": 1, "status": 1, "seasons": 1}
+    ).sort("_id", -1))
+    return render_template("series/index.html", series=all_series)
+
+
+@app.route("/series/<serie_id>")
+@login_required
+def serie_detail(serie_id):
+    serie = series_collection.find_one({"_id": ObjectId(serie_id)})
+    if not serie:
+        return render_template("404.html"), 404
+    return render_template("series/detail.html", serie=serie)
+
+
+@app.route("/series/<serie_id>/s<int:season_num>/e<int:episode_num>")
+@login_required
+def watch_serie(serie_id, season_num, episode_num):
+    serie = series_collection.find_one({"_id": ObjectId(serie_id)})
+    if not serie:
+        return render_template("404.html"), 404
+
+    season = next((s for s in serie.get("seasons", []) if s["season_number"] == season_num), None)
+    if not season:
+        return render_template("404.html"), 404
+
+    episode = next((ep for ep in season.get("episodes", []) if ep["episode_number"] == episode_num), None)
+    if not episode:
+        return render_template("404.html"), 404
+
+    return render_template(
+        "series/watch.html",
+        serie=serie,
+        season_num=season_num,
+        episode_num=episode_num,
+        episode=episode,
+        all_seasons=serie.get("seasons", [])
+    )
+
+
+@app.route("/series/ajouter", methods=["GET", "POST"])
+@admin_required
+def add_serie():
+    if request.method == "POST":
+        series_collection.insert_one({
+            "title":        request.form.get("title"),
+            "cover":        request.form.get("cover"),
+            "genres":       [g.strip() for g in request.form.get("genres", "").split(",") if g.strip()],
+            "status":       request.form.get("status", "En cours"),
+            "description":  request.form.get("description", ""),
+            "seasons":      [],
+            "created_date": datetime.utcnow(),
+            "updated_date": datetime.utcnow(),
+        })
+        return redirect(url_for("series_index"))
+    return render_template("series/add_serie.html")
+
+
+@app.route("/series/modifier/<id>", methods=["GET", "POST"])
+@admin_required
+def edit_serie(id):
+    if request.method == "POST":
+        series_collection.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {
+                "title":  request.form.get("title"),
+                "cover":  request.form.get("cover"),
+            }}
+        )
+        return redirect(url_for("series_index"))
+    serie = series_collection.find_one({"_id": ObjectId(id)})
+    return render_template("series/edit_serie.html", serie=serie)
+
+
+@app.route("/series/supprimer/<id>")
+@admin_required
+def delete_serie(id):
+    series_collection.delete_one({"_id": ObjectId(id)})
+    return redirect(url_for("series_index"))
+
+
+@app.route("/series/recherche")
+@login_required
+def serie_search():
+    query = request.args.get("q", "")
+    series = []
+    if query:
+        series = list(series_collection.find(
+            {"title": {"$regex": query, "$options": "i"}},
+            {"title": 1, "cover": 1, "genres": 1, "status": 1, "seasons": 1}
+        ))
+    return render_template("series/search.html", query=query, series=series)
+
+
+# ============================================================================
+# SUGGESTION API
+# ============================================================================
+
 @app.route("/api/suggestion", methods=["POST"])
 @login_required
 def send_suggestion():
-    """Envoie une suggestion utilisateur vers le webhook Discord dédié."""
-    data        = request.get_json(silent=True) or {}
-    contenu     = data.get("contenu", "").strip()
-    section     = data.get("section", "?")   # "film" ou "anime"
-    titre_ref   = data.get("titre_ref", "")  # titre du film/anime en cours
-    user        = session.get("user", "inconnu")
+    data      = request.get_json(silent=True) or {}
+    contenu   = data.get("contenu", "").strip()
+    section   = data.get("section", "?")
+    titre_ref = data.get("titre_ref", "")
+    user      = session.get("user", "inconnu")
 
     if not contenu:
         return jsonify({"ok": False, "error": "Suggestion vide"}), 400
@@ -223,6 +346,55 @@ def send_suggestion():
         color=0xffd700
     )
     return jsonify({"ok": ok})
+
+
+# ============================================================================
+# AUTOCOMPLETE API
+# ============================================================================
+
+@app.route("/api/autocomplete")
+@login_required
+def autocomplete():
+    q       = request.args.get("q", "").strip()
+    section = request.args.get("section", "all")
+    limit   = 8
+
+    if len(q) < 1:
+        return jsonify([])
+
+    regex   = {"$regex": q, "$options": "i"}
+    results = []
+
+    if section in ("films", "all"):
+        for m in movies_collection.find({"title": regex}, {"title": 1}).limit(limit):
+            results.append({
+                "label": format_title_with_flag(m["title"]),
+                "url":   url_for("watch_movie", movie_id=str(m["_id"])),
+                "type":  "Film",
+                "icon":  "🎬"
+            })
+
+    if section in ("series", "all"):
+        for s in series_collection.find({"title": regex}, {"title": 1}).limit(limit):
+            results.append({
+                "label": format_title_with_flag(s["title"]),
+                "url":   url_for("serie_detail", serie_id=str(s["_id"])),
+                "type":  "Série",
+                "icon":  "📺"
+            })
+
+    if section in ("animes", "all"):
+        for a in animes_collection.find({"name": regex}, {"name": 1}).limit(limit):
+            results.append({
+                "label": a["name"],
+                "url":   url_for("anime_detail", anime_name=a["name"]),
+                "type":  "Anime",
+                "icon":  "⚡"
+            })
+
+    q_lower = q.lower()
+    results.sort(key=lambda x: (0 if x["label"].lower().startswith(q_lower) else 1, x["label"]))
+    return jsonify(results[:limit])
 
 
 # ============================================================================
