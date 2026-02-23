@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ movie.title }} — ITH-Hub{% endblock %}
+{% block title %}{{ movie.title|flag_title }} — ITH-Hub{% endblock %}
 
 {% block content %}
 <div class="film-watch-container">
@@ -8,7 +8,7 @@
     <a href="{{ url_for('flix_index') }}" class="film-back-btn">
       <i class="fa-solid fa-chevron-left"></i> Retour au catalogue
     </a>
-    <span style="color:var(--text-muted);font-size:0.8rem;">/ {{ movie.title }}</span>
+    <span style="color:var(--text-muted);font-size:0.8rem;">/ {{ movie.title|flag_title }}</span>
   </div>
 
   <div class="film-player">
@@ -21,9 +21,9 @@
   </div>
 
   <div class="film-meta">
-    <h1>{{ movie.title }}</h1>
+    <h1>{{ movie.title|flag_title }}</h1>
     <p class="film-tagline">
-      Vous regardez <strong>{{ movie.title }}</strong> sans publicité ni pop-up sur ITH-Hub.
+      Vous regardez <strong>{{ movie.title|flag_title }}</strong> sans publicité ni pop-up sur ITH-Hub.
     </p>
   </div>
 
